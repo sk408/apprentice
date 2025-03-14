@@ -67,7 +67,8 @@ const AudiogramStep: React.FC = () => {
       <Typography paragraph>
         The audiogram is the standard tool for documenting hearing thresholds. 
         Understanding how to read and interpret an audiogram is a fundamental 
-        skill for audiologists and hearing healthcare professionals.
+        skill for audiologists and hearing healthcare professionals. This step 
+        will guide you through the basics of audiogram interpretation.
       </Typography>
       
       <Card elevation={3} sx={{ mb: 3 }}>
@@ -87,9 +88,10 @@ const AudiogramStep: React.FC = () => {
             Standard Audiogram Format
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            An audiogram plots frequency (Hz) on the horizontal axis and hearing level (dB HL) on the vertical axis. 
+            The audiogram plots frequency (Hz) on the horizontal axis and hearing level (dB HL) on the vertical axis. 
             Lower numbers on the vertical axis represent better hearing. The red line indicates the right ear, 
-            and the blue line indicates the left ear.
+            and the blue line indicates the left ear. Different symbols are used to represent air conduction, 
+            bone conduction, and masked thresholds.
           </Typography>
         </CardContent>
       </Card>
@@ -587,4 +589,4 @@ const AudiogramStep: React.FC = () => {
   );
 };
 
-export default AudiogramStep; 
+export default AudiogramStep;

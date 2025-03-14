@@ -56,30 +56,35 @@ const TutorialPage: React.FC = () => {
       label: 'Understanding the Audiogram',
       description: `The audiogram is a graph used to record hearing thresholds. Frequency (Hz) is displayed 
                    on the horizontal axis and intensity (dB HL) on the vertical axis. Lower numbers 
-                   on the vertical axis represent better hearing.`,
+                   on the vertical axis represent better hearing. This step will help you understand 
+                   how to read and interpret an audiogram.`,
       content: <AudiogramStep />
     },
     {
       label: 'The Hughson-Westlake Procedure',
       description: `The Hughson-Westlake procedure is a standardized method for determining hearing thresholds. 
-                   It uses an "up 5 dB, down 10 dB" approach to efficiently find the softest level a patient can hear.`,
+                   It uses an "up 5 dB, down 10 dB" approach to efficiently find the softest level a patient can hear. 
+                   This step will guide you through the procedure with detailed instructions.`,
       content: <HughsonWestlakeStep />
     },
     {
       label: 'Masking Procedures',
       description: `Masking is used to prevent crossover of sound to the non-test ear. This is critical 
-                   when there are significant differences between ears or when testing bone conduction.`,
+                   when there are significant differences between ears or when testing bone conduction. 
+                   This step will explain when and how to use masking during audiometric testing.`,
       content: <MaskingStep />
     },
     {
       label: 'Common Testing Errors',
       description: `Being aware of common testing errors will help you improve your testing technique 
-                   and produce more accurate results. Here are errors to avoid:`,
+                   and produce more accurate results. Here are errors to avoid and tips to ensure 
+                   accurate audiometric testing.`,
       content: <TestingErrorsStep />
     },
     {
       label: 'Ready to Practice',
-      description: `You've completed the tutorial and are now ready to practice pure tone audiometry!`,
+      description: `You've completed the tutorial and are now ready to practice pure tone audiometry! 
+                   This step will provide you with practice scenarios and tips to refine your skills.`,
       content: <CompletionStep onComplete={handleComplete} />
     }
   ];
@@ -135,4 +140,4 @@ const TutorialPage: React.FC = () => {
   );
 };
 
-export default TutorialPage; 
+export default TutorialPage;

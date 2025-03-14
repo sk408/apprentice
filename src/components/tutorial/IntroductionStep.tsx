@@ -177,14 +177,15 @@ const IntroductionStep: React.FC = () => {
         <Typography paragraph>
           Pure tone audiometry involves presenting tones across a range of frequencies and intensities 
           to determine the softest level at which a patient can hear each frequency. This is known as 
-          the hearing threshold.
+          the hearing threshold. This test is essential for fitting hearing aids as it helps determine 
+          the degree and type of hearing loss.
         </Typography>
         
         <Alert severity="info" sx={{ mb: 2 }}>
           <Typography variant="subtitle2" gutterBottom>Pro Tip:</Typography>
           <Typography variant="body2">
-            Always start with the better ear if known, or with the right ear by convention. 
-            This helps the patient understand the task with their better ear first.
+            Ensure the patient is seated comfortably and understands the test procedure. Explain that they 
+            should press the response button whenever they hear a tone, no matter how faint it may be.
           </Typography>
         </Alert>
       </Box>
@@ -296,4 +297,4 @@ const IntroductionStep: React.FC = () => {
   );
 };
 
-export default IntroductionStep; 
+export default IntroductionStep;

@@ -26,9 +26,7 @@ import {
   FormLabel,
   FormGroup,
   FormControlLabel,
-  Checkbox,
-  Paper,
-  GlobalStyles
+  Checkbox
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -42,9 +40,7 @@ import {
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
   KeyboardArrowDown,
-  HearingDisabled,
-  ZoomIn,
-  VolumeUp
+  HearingDisabled
 } from '@mui/icons-material';
 
 // Import pages
@@ -52,11 +48,6 @@ import HomePage from './pages/HomePage';
 import TutorialPage from './pages/TutorialPage';
 import PatientsPage from './pages/PatientsPage';
 import FollowUpPage from './pages/FollowUpPage';
-import TroubleshootingGuidePage from './pages/TroubleshootingGuidePage';
-import RealEarMeasurementPage from './pages/RealEarMeasurementPage';
-import EarAnatomyPage from './pages/EarAnatomyPage';
-import OtoscopyPage from './pages/OtoscopyPage';
-import ContourTestPage from './pages/ContourTestPage';
 // import SettingsPage from './pages/SettingsPage';
 
 // Import logo for splash screen
@@ -196,16 +187,6 @@ function App() {
               },
             },
           },
-          MuiLink: {
-            styleOverrides: {
-              root: {
-                color: 'inherit',
-                '&:visited': {
-                  color: 'inherit',
-                },
-              },
-            },
-          },
         },
       }),
     [darkMode, highContrastMode, fontSize]
@@ -246,13 +227,8 @@ function App() {
   const menuItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
     { text: 'Tutorial', icon: <SchoolIcon />, path: '/tutorial' },
-    { text: 'Ear Anatomy', icon: <HearingIcon />, path: '/ear-anatomy' },
-    { text: 'Otoscopy', icon: <ZoomIn />, path: '/otoscopy' },
     { text: 'Patients', icon: <PersonIcon />, path: '/patients' },
     { text: 'Follow-Up', icon: <HearingDisabled />, path: '/followup' },
-    { text: 'Troubleshooting', icon: <HelpIcon />, path: '/troubleshooting' },
-    { text: 'Real Ear', icon: <HearingIcon />, path: '/real-ear-measurement' },
-    { text: 'Contour Test', icon: <VolumeUp />, path: '/contour-test' },
     // { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
 
@@ -272,20 +248,7 @@ function App() {
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem 
-            key={item.text} 
-            component={Link} 
-            to={item.path}
-            sx={{ 
-              color: 'text.primary',
-              '&:visited': { 
-                color: 'text.primary' 
-              },
-              '&:hover': {
-                backgroundColor: 'action.hover'
-              }
-            }}
-          >
+          <ListItem key={item.text} component={Link} to={item.path}>
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItem>
@@ -378,17 +341,6 @@ function App() {
   return (
     <ThemeProvider theme={appTheme}>
       <CssBaseline />
-      <GlobalStyles
-        styles={{
-          'a': {
-            color: 'inherit',
-            textDecoration: 'none',
-          },
-          'a:visited': {
-            color: 'inherit',
-          },
-        }}
-      />
       <Router>
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <AppBar position="static">
@@ -481,11 +433,6 @@ function App() {
               <Route path="/tutorial" element={<TutorialPage />} />
               <Route path="/patients" element={<PatientsPage />} />
               <Route path="/followup" element={<FollowUpPage />} />
-              <Route path="/troubleshooting" element={<TroubleshootingGuidePage />} />
-              <Route path="/real-ear-measurement" element={<RealEarMeasurementPage />} />
-              <Route path="/ear-anatomy" element={<EarAnatomyPage />} />
-              <Route path="/otoscopy" element={<OtoscopyPage />} />
-              <Route path="/contour-test" element={<ContourTestPage />} />
               {/* <Route path="/settings" element={<SettingsPage />} /> */}
             </Routes>
           </Box>
@@ -508,22 +455,16 @@ function App() {
               </Typography>
               <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: { xs: 1, sm: 2 } }}>
-                  <Link to="/tutorial" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  <Link to="/tutorial" style={{ color: 'inherit' }}>
                     Tutorial
                   </Link>
-                  <Link to="/ear-anatomy" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    Ear Anatomy
-                  </Link>
-                  <Link to="/patients" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  <Link to="/patients" style={{ color: 'inherit' }}>
                     Practice
                   </Link>
-                  <Link to="/followup" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  <Link to="/followup" style={{ color: 'inherit' }}>
                     Follow-Up
                   </Link>
-                  <Link to="/troubleshooting" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    Troubleshooting
-                  </Link>
-                  {/* <Link to="/settings" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  {/* <Link to="/settings" style={{ color: 'inherit' }}>
                     Settings
                   </Link> */}
                 </Box>
