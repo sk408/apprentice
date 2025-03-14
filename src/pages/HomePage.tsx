@@ -25,9 +25,11 @@ import {
   Info,
   HearingDisabled
 } from '@mui/icons-material';
+import TestSettings from '../components/TestSettings';
 
 const HomePage: React.FC = () => {
   const theme = useTheme();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
@@ -412,6 +414,9 @@ const HomePage: React.FC = () => {
           </Typography>
         </Container>
       </Box>
+
+      {/* Test Settings */}
+      <TestSettings />
     </Box>
   );
 };
