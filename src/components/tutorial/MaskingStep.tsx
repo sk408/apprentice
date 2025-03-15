@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+// import InteractiveMaskingTrainer from './InteractiveMaskingTrainer';
 
 const MaskingStep: React.FC = () => {
   const theme = useTheme();
@@ -455,7 +456,7 @@ const MaskingStep: React.FC = () => {
         
         <Alert severity="info" sx={{ mt: 2 }}>
           <Typography variant="body2">
-            <strong>Research Finding:</strong> According to the 2020 study by Heisey et al., dynamically masked audiograms using machine learning achieved accurate threshold estimates with reduced test time compared to conventional clinical masking procedures. The research showed a mean absolute difference of only 2.6-4.9 dB between machine learning and conventional masking methods.
+            <strong>Research Finding:</strong> According to the 2020 study by Heisey et al. published in the Journal of the American Academy of Audiology ("Automated Pure-Tone Audiometry Using Active Machine Learning"), dynamically masked audiograms using machine learning achieved accurate threshold estimates with reduced test time compared to conventional clinical masking procedures. The research showed a mean absolute difference of only 2.6-4.9 dB between machine learning and conventional masking methods.
           </Typography>
         </Alert>
       </Paper>
@@ -648,6 +649,12 @@ const MaskingStep: React.FC = () => {
         <Typography variant="subtitle2" paragraph>
           Plateau Technique Example: Testing Right Ear, Masking Left Ear at 1000 Hz
         </Typography>
+        
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            <strong>Frequency-Specific Considerations:</strong> Effective masking levels also depend on frequency-specific differences between ears. Lower frequencies typically require higher effective masking levels due to better bone conduction thresholds in most patients, while high-frequency asymmetries may require special attention due to potential overmasking issues. Always consider the specific frequency being tested when determining appropriate masking levels.
+          </Typography>
+        </Alert>
         
         <TableContainer component={Paper} variant="outlined" sx={{ mb: 2 }}>
           <Table size="small">
@@ -856,6 +863,14 @@ const MaskingStep: React.FC = () => {
           <strong>Remembering when to mask during bone conduction:</strong> Clinical practice assumes 0 dB interaural attenuation for bone conduction. This means the signal essentially reaches both cochleas simultaneously regardless of placement, making masking necessary in almost all bone conduction testing where there is any asymmetry between ears.
         </Typography>
       </Alert>
+      
+      {/* 
+      <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
+        Practice Your Masking Skills
+      </Typography>
+      
+      <InteractiveMaskingTrainer />
+      */}
     </Box>
   );
 };

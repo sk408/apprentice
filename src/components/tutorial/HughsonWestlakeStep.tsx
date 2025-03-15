@@ -74,6 +74,11 @@ const HughsonWestlakeStep: React.FC = () => {
                 <Typography variant="body2" paragraph>
                   <strong>Present an audible tone</strong> (typically 40 dB HL for adults with no known hearing loss)
                 </Typography>
+                <Typography variant="body2" paragraph sx={{ pl: 2, fontSize: '0.9rem', color: theme.palette.text.secondary }}>
+                  <strong>Clinical tip:</strong> Adjust this initial level based on case history. For patients reporting normal 
+                  hearing, you might start at 30 dB HL; for those with known hearing loss, consider starting at a higher level 
+                  to ensure audibility.
+                </Typography>
               </li>
               <li>
                 <Typography variant="body2" paragraph>
@@ -411,6 +416,11 @@ const HughsonWestlakeStep: React.FC = () => {
                   <strong>Key concept:</strong> We continued to follow the "decrease by 10 dB after a response" rule 
                   throughout testing, even during threshold determination. This ensures we've truly found the softest 
                   sound the patient can hear.
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  <strong>Note:</strong> While negative dB HL values (-5 to -10 dB HL) exist on audiometers, they represent better-than-average 
+                  hearing and are relatively rare in clinical settings. Most normal-hearing individuals have thresholds 
+                  between 0-20 dB HL.
                 </Typography>
               </Box>
               

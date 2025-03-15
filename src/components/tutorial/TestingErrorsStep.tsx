@@ -86,7 +86,7 @@ const TestingErrorsStep: React.FC = () => {
               </li>
               <li>
                 <Typography variant="body2">
-                  <strong>Collapsing Ear Canals:</strong> Not identifying or addressing this issue in elderly patients
+                  <strong>Collapsing Ear Canals:</strong> Not identifying or addressing this issue in elderly patients, which can affect both pure tone thresholds and impedance measurements
                 </Typography>
               </li>
             </Box>
@@ -178,6 +178,7 @@ const TestingErrorsStep: React.FC = () => {
               <li><Typography variant="body2">Elderly (allow more time, check for collapsing ear canals)</Typography></li>
               <li><Typography variant="body2">Non-native speakers (use translated instructions or demonstrations)</Typography></li>
               <li><Typography variant="body2">Patients with cognitive impairments (simplify instructions, use more practice trials)</Typography></li>
+              <li><Typography variant="body2">Patients with tinnitus (use pulsed tones, carefully explain distinction between tinnitus and test tones)</Typography></li>
             </Box>
           </Paper>
         </Grid>

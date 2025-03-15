@@ -32,7 +32,11 @@ import {
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
   KeyboardArrowDown,
-  HearingDisabled
+  HearingDisabled,
+  Psychology,
+  VolumeUp,
+  MenuBook,
+  SpeakerPhone
 } from '@mui/icons-material';
 import { useThemeContext } from './ThemeContext';
 
@@ -41,6 +45,10 @@ const menuItems = [
   { text: 'Tutorial', icon: <SchoolIcon />, path: '/tutorial' },
   { text: 'Patients', icon: <PersonIcon />, path: '/patients' },
   { text: 'Follow-Up', icon: <HearingDisabled />, path: '/followup' },
+  { text: 'Contour Test', icon: <Psychology />, path: '/contour-test' },
+  { text: 'Ear Anatomy', icon: <MenuBook />, path: '/ear-anatomy' },
+  { text: 'Otoscopy', icon: <SpeakerPhone />, path: '/otoscopy' },
+  { text: 'Real Ear Measurements', icon: <VolumeUp />, path: '/real-ear-measurement' },
   // { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
 ];
 

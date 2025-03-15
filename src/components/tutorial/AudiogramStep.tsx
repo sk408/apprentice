@@ -132,7 +132,7 @@ const AudiogramStep: React.FC = () => {
             </Box>
             <Typography variant="body2" color="text.secondary">
               Lower frequencies (250-500 Hz) correspond to vowel sounds and are important for speech comprehension.
-              Higher frequencies (2000-8000 Hz) correspond to consonant sounds and are critical for speech clarity.
+              Higher frequencies (2000-8000 Hz) correspond primarily to consonant sounds and are critical for speech clarity.
             </Typography>
           </Paper>
         </Grid>
@@ -339,7 +339,7 @@ const AudiogramStep: React.FC = () => {
               </Box>
               <Typography variant="body2">
                 <strong>Characteristics:</strong> Classic "notch" at 4000 Hz with better thresholds at higher and lower frequencies.
-                Typically bilateral and symmetrical.
+                Typically bilateral and symmetrical. The notch may also occur at 3000 Hz or 6000 Hz, depending on the noise exposure type.
               </Typography>
               <Typography variant="body2" sx={{ mt: 1, color: theme.palette.text.secondary }}>
                 <strong>Common causes:</strong> Excessive noise exposure, industrial work, gunfire, loud music

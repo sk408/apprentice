@@ -56,7 +56,7 @@ const IntroductionStep: React.FC = () => {
       <Typography paragraph>
         Pure Tone Audiometry (PTA) is the gold standard for measuring hearing sensitivity. 
         It uses pure tones of different frequencies to determine the softest sounds a person 
-        can hear at each frequency. This test helps audiologists diagnose hearing loss and 
+        can hear at each frequency in decibels hearing level (dB HL). This test helps audiologists diagnose hearing loss and 
         determine appropriate interventions.
       </Typography>
       
@@ -208,7 +208,7 @@ const IntroductionStep: React.FC = () => {
             </Typography>
             <List dense disablePadding>
               <ListItem sx={{ py: 0.5 }}>
-                <Typography variant="body2">• Background noise levels below ANSI standards</Typography>
+                <Typography variant="body2">• Background noise levels below ANSI S3.1-1999 standards</Typography>
               </ListItem>
               <ListItem sx={{ py: 0.5 }}>
                 <Typography variant="body2">• Proper lighting for patient observation</Typography>
