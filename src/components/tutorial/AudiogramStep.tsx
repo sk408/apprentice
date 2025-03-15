@@ -52,14 +52,14 @@ const AudiogramStep: React.FC = () => {
 
   // Sample audiogram symbols
   const symbols = [
-    { name: 'Right Ear (Air)', symbol: 'O', color: theme.palette.primary.main },
-    { name: 'Left Ear (Air)', symbol: 'X', color: theme.palette.secondary.main },
-    { name: 'Right Ear (Bone)', symbol: '<', color: theme.palette.primary.main },
-    { name: 'Left Ear (Bone)', symbol: '>', color: theme.palette.secondary.main },
-    { name: 'No Response Right', symbol: '↓', color: theme.palette.primary.main },
-    { name: 'No Response Left', symbol: '↓', color: theme.palette.secondary.main },
-    { name: 'Masked Right', symbol: '[O]', color: theme.palette.primary.main },
-    { name: 'Masked Left', symbol: '[X]', color: theme.palette.secondary.main },
+    { name: 'Right Ear (Air)', symbol: 'O', color: 'rgb(255, 0, 0)' },
+    { name: 'Left Ear (Air)', symbol: 'X', color: 'rgb(0, 0, 255)' },
+    { name: 'Right Ear (Bone)', symbol: '<', color: 'rgb(255, 0, 0)' },
+    { name: 'Left Ear (Bone)', symbol: '>', color: 'rgb(0, 0, 255)' },
+    { name: 'No Response Right', symbol: '↓', color: 'rgb(255, 0, 0)' },
+    { name: 'No Response Left', symbol: '↓', color: 'rgb(0, 0, 255)' },
+    { name: 'Masked Right', symbol: '[O]', color: 'rgb(255, 0, 0)' },
+    { name: 'Masked Left', symbol: '[X]', color: 'rgb(0, 0, 255)' },
   ];
 
   return (

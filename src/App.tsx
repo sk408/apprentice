@@ -12,6 +12,10 @@ import HomePage from './pages/HomePage';
 import TutorialPage from './pages/TutorialPage';
 import PatientsPage from './pages/PatientsPage';
 import FollowUpPage from './pages/FollowUpPage';
+import EarAnatomyPage from './pages/EarAnatomyPage';
+import OtoscopyPage from './pages/OtoscopyPage';
+import TroubleshootingGuidePage from './pages/TroubleshootingGuidePage';
+import RealEarMeasurementPage from './pages/RealEarMeasurementPage';
 // import SettingsPage from './pages/SettingsPage';
 
 function App() {
@@ -40,6 +44,10 @@ function App() {
                 <Route path="/tutorial" element={<TutorialPage />} />
                 <Route path="/patients" element={<PatientsPage />} />
                 <Route path="/followup" element={<FollowUpPage />} />
+                <Route path="/ear-anatomy" element={<EarAnatomyPage />} />
+                <Route path="/otoscopy" element={<OtoscopyPage />} />
+                <Route path="/troubleshooting" element={<TroubleshootingGuidePage />} />
+                <Route path="/real-ear-measurement" element={<RealEarMeasurementPage />} />
                 {/* <Route path="/settings" element={<SettingsPage />} /> */}
               </Routes>
             </Layout>
