@@ -296,6 +296,20 @@ const useAudioTest = (
       const progress = testingService.calculateProgress();
       setTestProgress(progress);
       console.log(`Test progress updated: ${progress}%`);
+      
+      // Debug output to help identify why progress may not be updating
+      if (progress === 0 && session.testSequence.some(step => step.completed)) {
+        console.log('WARNING: Progress is 0% but there are completed steps:', 
+          session.testSequence.filter(step => step.completed)
+            .map(s => ({ 
+              id: s.id, 
+              freq: s.frequency, 
+              ear: s.ear, 
+              completed: s.completed, 
+              status: s.responseStatus 
+            }))
+        );
+      }
     }
   }, [session, currentStep]);
 

@@ -1,13 +1,18 @@
 import React from 'react';
-import { Box, LinearProgress, Typography, Paper } from '@mui/material';
+import { Box, LinearProgress, Typography, Paper, Chip } from '@mui/material';
 import { TestStep } from '../../interfaces/AudioTypes';
 
 interface ProgressHeaderProps {
   currentStep: TestStep;
   testProgress: number;
+  thresholdCount?: number; // Optional number of thresholds stored
 }
 
-const ProgressHeader: React.FC<ProgressHeaderProps> = ({ currentStep, testProgress }) => {
+const ProgressHeader: React.FC<ProgressHeaderProps> = ({ 
+  currentStep, 
+  testProgress,
+  thresholdCount 
+}) => {
   return (
     <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -20,14 +25,24 @@ const ProgressHeader: React.FC<ProgressHeaderProps> = ({ currentStep, testProgre
           <Typography variant="subtitle1" fontWeight="medium">
             Test Progress
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {Math.round(testProgress * 100)}%
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {thresholdCount !== undefined && (
+              <Chip 
+                label={`${thresholdCount} thresholds stored`} 
+                size="small" 
+                color="primary" 
+                variant="outlined"
+              />
+            )}
+            <Typography variant="body2" color="text.secondary">
+              {testProgress}%
+            </Typography>
+          </Box>
         </Box>
         
         <LinearProgress 
           variant="determinate" 
-          value={testProgress * 100} 
+          value={testProgress} 
           sx={{ mb: 1.5, height: 8, borderRadius: 1 }}
         />
         

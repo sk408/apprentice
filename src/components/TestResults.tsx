@@ -72,12 +72,32 @@ const TestResults: React.FC<TestResultsProps> = ({ session, onNewTest }) => {
   // Get results from session
   const results = session.results as TestResult;
   
+  // If results is undefined, show an error message
+  if (!results) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Test results are missing or incomplete. Please try running the test again.
+        </Alert>
+        <Button variant="contained" onClick={onNewTest}>
+          Return to Patient Selection
+        </Button>
+      </Box>
+    );
+  }
+  
   // Get patient details
   const patient = patientService.getPatientById(session.patientId);
   
   // Calculate the accuracy metrics if actual thresholds are available
   const calculateAccuracyMetrics = () => {
     if (!patient) return { accuracy: 0, exactMatch: 0, within5dB: 0, within10dB: 0, missedThresholds: 0 };
+    
+    // Add null checks for results and userThresholds
+    if (!results || !results.userThresholds) {
+      console.error('Missing results or userThresholds:', results);
+      return { accuracy: 0, exactMatch: 0, within5dB: 0, within10dB: 0, missedThresholds: 0 };
+    }
     
     const userThresholds = results.userThresholds;
     const actualThresholds = patient.thresholds;
@@ -126,7 +146,14 @@ const TestResults: React.FC<TestResultsProps> = ({ session, onNewTest }) => {
     };
   };
   
-  const metrics = calculateAccuracyMetrics();
+  // Add a try-catch block to prevent errors from breaking the component
+  let metrics;
+  try {
+    metrics = calculateAccuracyMetrics();
+  } catch (error) {
+    console.error('Error calculating metrics:', error);
+    metrics = { accuracy: 0, exactMatch: 0, within5dB: 0, within10dB: 0, missedThresholds: 0 };
+  }
   
   // Handle tab change
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {

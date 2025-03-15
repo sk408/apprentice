@@ -248,32 +248,69 @@ export default function useTestControls({
       return (Math.abs(curr - frequency) < Math.abs(prev - frequency)) ? curr : prev;
     });
     
-    // First, handle frequency change if needed
-    if (closestFrequency !== currentStep.frequency) {
-      // Use the existing frequency adjustment logic
-      const direction = availableFrequencies.indexOf(closestFrequency) - availableFrequencies.indexOf(currentStep.frequency as Frequency);
-      handleAdjustFrequency(direction);
+    console.log(`Audiogram click - requested: ${frequency}Hz at ${level}dB, closest available: ${closestFrequency}Hz`);
+    
+    // Instead of changing frequency first and then level, we need to update both at once
+    // to avoid the UI snapping back to the original state
+    try {
+      // Create a proper new level without exceeding bounds
+      const newLevel = Math.max(-10, Math.min(120, level)) as HearingLevel;
       
-      // Wait for frequency change to complete, then adjust level
-      // This is a simplified approach - in practice, you might want to use a more robust method
-      setTimeout(() => {
-        // Get current level after frequency change
-        const currentLevel = testingService.getCurrentStep()?.currentLevel || 0;
-        // Calculate level change
-        const levelChange = level - currentLevel;
-        // Adjust level if different
-        if (levelChange !== 0) {
-          handleAdjustLevel(levelChange);
+      // Handle both frequency and level changes directly
+      if (closestFrequency !== currentStep.frequency || newLevel !== currentStep.currentLevel) {
+        // Get the index of the new frequency in the test sequence
+        const targetStepIndex = session.testSequence.findIndex(
+          step => step.frequency === closestFrequency && step.ear === currentStep.ear && step.testType === currentStep.testType
+        );
+        
+        if (targetStepIndex !== -1) {
+          // Get the target step
+          const targetStep = { ...session.testSequence[targetStepIndex] };
+          
+          // Set the new level on the target step
+          targetStep.currentLevel = newLevel;
+          
+          // Update testing service state directly - TestingService doesn't have setFrequency
+          // Instead, we update the current session step index, which changes the frequency
+          const currentSession = testingService.getCurrentSession();
+          if (currentSession) {
+            currentSession.currentStep = targetStepIndex;
+          }
+          testingService.setCurrentLevel(newLevel);
+          
+          // Update currentStep directly instead of using handleAdjustFrequency
+          setCurrentStep(targetStep);
+          
+          // Update session
+          const updatedSession = { ...session };
+          updatedSession.currentStep = targetStepIndex;
+          updatedSession.testSequence = [...updatedSession.testSequence];
+          updatedSession.testSequence[targetStepIndex] = targetStep;
+          
+          // Apply any threshold preservation logic
+          const finalSession = preserveThresholds(updatedSession);
+          setSession(finalSession);
+          
+          // Reset UI state for the new frequency/level
+          if (targetStep.completed && targetStep.responseStatus === 'threshold') {
+            setProcedurePhase('complete');
+            setSuggestedAction('next');
+            setCurrentGuidance(`This frequency already has a threshold stored at ${targetStep.currentLevel} dB. You can proceed to the next frequency or adjust the level to retest.`);
+          } else {
+            setProcedurePhase('initial');
+            setSuggestedAction('present');
+            setCurrentGuidance(`Now testing at ${closestFrequency} Hz and ${newLevel} dB. Present the tone to check for response.`);
+          }
+          
+          console.log(`Audiogram click - changed to ${closestFrequency}Hz at ${newLevel}dB`);
+        } else {
+          console.error(`Could not find matching step for frequency ${closestFrequency}Hz in test sequence`);
         }
-      }, 100);
-    } else {
-      // Just adjust level if frequency is the same
-      const levelChange = level - currentStep.currentLevel;
-      if (levelChange !== 0) {
-        handleAdjustLevel(levelChange);
       }
+    } catch (error) {
+      console.error("Error handling audiogram click:", error);
     }
-  }, [currentStep, session, handleAdjustFrequency, handleAdjustLevel]);
+  }, [currentStep, session, setCurrentStep, setSession, setProcedurePhase, setSuggestedAction, setCurrentGuidance, preserveThresholds]);
 
   return {
     handleAdjustLevel,

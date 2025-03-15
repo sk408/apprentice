@@ -68,10 +68,10 @@ export const simulatePatientResponse = (
   // Add some variability (±5 dB) to make it more realistic
   const variability = Math.floor(Math.random() * 10) - 5;
   
-  // MODIFIED: Ensure the effective threshold is never below 10dB
-  // Even if the patient's actual threshold is below 10dB, they should not respond below 10dB
+  // Ensure the effective threshold is never below 5dB
+  // Even if the patient's actual threshold is lower, they should not respond below 5dB
   const rawThreshold = matchingThreshold.hearingLevel + variability;
-  const effectiveThreshold = Math.max(10, rawThreshold);
+  const effectiveThreshold = Math.max(5, rawThreshold);
   
   return currentStep.currentLevel >= effectiveThreshold;
 };

@@ -129,6 +129,10 @@ export default function useThresholdValidation({
     // Update the TestingService with the validated threshold level
     testingService.setCurrentLevel(validThresholdLevel as HearingLevel);
     
+    // IMPORTANT: Explicitly update the step's responseStatus in TestingService
+    // This ensures the threshold is counted correctly in progress calculation
+    testingService.completeCurrentStep('threshold');
+    
     // Mark the current step as completed without advancing to next step
     if (session) {
       const updatedSession = { ...session };
@@ -186,6 +190,10 @@ export default function useThresholdValidation({
       
       console.log(`Threshold stored at ${validThresholdLevel}dB, marked as completed but staying on current frequency`);
     }
+    
+    // Force update of test progress since we've completed a step
+    const progress = testingService.calculateProgress();
+    console.log(`Updated progress after storing threshold: ${progress}%`);
     
     // Add clearer feedback for successful threshold storage and navigation instructions
     setCurrentGuidance(`Threshold successfully stored at ${validThresholdLevel} dB! You can now use the up arrow (or press Up) to move to the next frequency, or the down arrow to go to a previous frequency.`);

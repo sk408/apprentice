@@ -1,9 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { 
   TestSession, TestStep, HearingProfile, ThresholdPoint, 
-  Frequency, HearingLevel, TestResult, Ear 
+  Frequency, HearingLevel, TestResult, Ear, TestType 
 } from '../interfaces/AudioTypes';
 import audioService from './AudioService';
+import patientService from './PatientService';
 
 /**
  * Interface for test session configuration
@@ -90,30 +91,71 @@ class TestingService {
     const sequence: TestStep[] = [];
     let stepId = 1;
     
-    // For each ear (right first, then left)
-    ['right', 'left'].forEach(ear => {
-      // For each test type (air conduction, then bone conduction)
-      this.testTypes.forEach(testType => {
-        // Skip bone conduction for some difficulties or based on settings
-        if (testType === 'bone' && !this.includeBoneConduction) {
-          return;
+    // Define the correct test order: first air conduction for both ears, then bone conduction for both ears
+    const testSequenceOrder = [
+      { ear: 'right' as Ear, testType: 'air' as TestType },
+      { ear: 'left' as Ear, testType: 'air' as TestType },
+      { ear: 'right' as Ear, testType: 'bone' as TestType },
+      { ear: 'left' as Ear, testType: 'bone' as TestType }
+    ];
+    
+    // For each test configuration in the sequence
+    testSequenceOrder.forEach(({ ear, testType }) => {
+      // Skip bone conduction if not included in test settings
+      if (testType === 'bone' && !this.includeBoneConduction) {
+        return;
+      }
+      
+      // Skip air conduction if not included in test settings
+      if (testType === 'air' && !this.includeAirConduction) {
+        return;
+      }
+      
+      // Select appropriate frequencies for this test type
+      const rawFrequencies = testType === 'bone' ? this.boneTestFrequencies : this.testFrequencies;
+      
+      // Standard clinical protocol:
+      // 1. Start at 1000 Hz
+      // 2. Test ascending frequencies (1500 Hz+)
+      // 3. Retest 1000 Hz to verify
+      // 4. Test descending frequencies (750 Hz-)
+      const frequencySequence: Frequency[] = [];
+      
+      // Find the index of 1000 Hz in the original frequency array
+      const idx1000Hz = rawFrequencies.indexOf(1000);
+      
+      if (idx1000Hz !== -1) {
+        // Step 1: Start with 1000 Hz
+        frequencySequence.push(1000);
+        
+        // Step 2: Add ascending frequencies (after 1000 Hz)
+        for (let i = idx1000Hz + 1; i < rawFrequencies.length; i++) {
+          frequencySequence.push(rawFrequencies[i]);
         }
         
-        // Select appropriate frequencies for this test type
-        const frequencies = testType === 'bone' ? this.boneTestFrequencies : this.testFrequencies;
+        // Step 3: Retest 1000 Hz
+        frequencySequence.push(1000);
         
-        // For each frequency in the sequence
-        frequencies.forEach(freq => {
-          // Add test step
-          sequence.push({
-            id: stepId++,
-            frequency: freq,
-            ear: ear as Ear,
-            testType: testType,
-            currentLevel: this.defaultStartLevel,
-            completed: false,
-            responses: []
-          });
+        // Step 4: Add descending frequencies (before 1000 Hz)
+        for (let i = idx1000Hz - 1; i >= 0; i--) {
+          frequencySequence.push(rawFrequencies[i]);
+        }
+      } else {
+        // 1000 Hz not found, use original order as fallback
+        frequencySequence.push(...rawFrequencies);
+      }
+      
+      // For each frequency in the ordered sequence
+      frequencySequence.forEach(freq => {
+        // Add test step
+        sequence.push({
+          id: stepId++,
+          frequency: freq,
+          ear: ear,
+          testType: testType,
+          currentLevel: this.defaultStartLevel,
+          completed: false,
+          responses: []
         });
       });
     });
@@ -406,9 +448,20 @@ class TestingService {
     const session = this.currentSession;
     session.completed = true;
     
-    // Calculate the results
-    const results = this.calculateResults(session);
+    // Calculate the results - make sure patient details are included
+    const patientId = session.patientId;
+    const patient = patientService.getPatientById(patientId);
+    
+    // Calculate the results - pass the patient's actual thresholds
+    const results = this.calculateResults(session, patient?.thresholds || []);
     session.results = results;
+    
+    // Debug log to verify results are correctly populated
+    console.log('Completing test session with results:', {
+      sessionId: session.id,
+      userThresholds: results.userThresholds?.length || 0,
+      actualThresholds: results.actualThresholds?.length || 0
+    });
     
     // Move from active to completed sessions
     this.completedSessions.push(session);
@@ -421,19 +474,52 @@ class TestingService {
   /**
    * Calculate test results including accuracy and technical errors
    * @param session - Completed test session
+   * @param actualThresholds - Patient's actual thresholds for comparison
    * @returns Test results
    */
-  private calculateResults(session: TestSession): TestResult {
-    // This would normally require accessing the actual patient thresholds
-    // and comparing with the user's measurements
+  private calculateResults(session: TestSession, actualThresholds: ThresholdPoint[] = []): TestResult {
+    const userThresholds = this.extractThresholds(session);
     
-    // For now, generate a placeholder result
+    // Calculate accuracy by comparing user thresholds with actual thresholds
+    let accuracySum = 0;
+    let comparedCount = 0;
+    
+    userThresholds.forEach(userT => {
+      const matchingActual = actualThresholds.find(
+        actT => 
+          actT.frequency === userT.frequency && 
+          actT.ear === userT.ear && 
+          actT.testType === userT.testType && 
+          actT.responseStatus === 'threshold' && 
+          userT.responseStatus === 'threshold'
+      );
+      
+      if (matchingActual) {
+        const difference = Math.abs(userT.hearingLevel - matchingActual.hearingLevel);
+        if (difference <= 5) {
+          // Within 5dB is considered accurate
+          accuracySum += 100 - (difference * 5); // 100% for exact match, 75% for 5dB difference
+        } else if (difference <= 10) {
+          // Within 10dB is partially accurate
+          accuracySum += 50; // 50% accuracy for 6-10dB difference
+        } else {
+          // More than 10dB difference is considered inaccurate
+          accuracySum += 25; // 25% accuracy for >10dB difference
+        }
+        comparedCount++;
+      }
+    });
+    
+    // Calculate overall accuracy
+    const accuracy = comparedCount > 0 ? Math.round(accuracySum / comparedCount) : 0;
+    
+    // Create the result object
     const result: TestResult = {
       patientId: session.patientId,
       timestamp: new Date().toISOString(),
-      userThresholds: this.extractThresholds(session),
-      actualThresholds: [], // Would need to get these from the patient profile
-      accuracy: 0, // To be calculated
+      userThresholds: userThresholds,
+      actualThresholds: actualThresholds, // Include the actual thresholds
+      accuracy: accuracy,
       testDuration: this.calculateTestDuration(session),
       technicalErrors: this.identifyTechnicalErrors(session)
     };
@@ -648,10 +734,68 @@ class TestingService {
     const totalSteps = this.currentSession.testSequence.length;
     if (totalSteps === 0) return 0;
     
-    const currentStepIndex = this.currentSession.currentStep;
+    // Count completed steps with stored thresholds instead of using the current step index
+    const completedSteps = this.currentSession.testSequence.filter(
+      step => step.completed && step.responseStatus === 'threshold'
+    ).length;
     
-    // Calculate progress as percentage
-    return Math.round((currentStepIndex / totalSteps) * 100);
+    // Enhanced debugging to troubleshoot progress calculation
+    console.log(`Progress calculation:`, {
+      totalSteps,
+      completedSteps,
+      // Log the actual steps that are counted as completed with thresholds
+      completedThresholdSteps: this.currentSession.testSequence
+        .filter(step => step.completed && step.responseStatus === 'threshold')
+        .map(s => ({
+          id: s.id,
+          frequency: s.frequency,
+          ear: s.ear,
+          level: s.currentLevel,
+          responseStatus: s.responseStatus
+        })),
+      // Log all steps that are marked as completed regardless of responseStatus
+      allCompletedSteps: this.currentSession.testSequence
+        .filter(step => step.completed)
+        .map(s => ({
+          id: s.id,
+          frequency: s.frequency,
+          ear: s.ear,
+          level: s.currentLevel,
+          responseStatus: s.responseStatus || 'none' // Show 'none' if undefined
+        }))
+    });
+    
+    // Calculate progress as percentage of completed thresholds
+    const progress = Math.round((completedSteps / totalSteps) * 100);
+    console.log(`Progress: ${completedSteps}/${totalSteps} steps completed (${progress}%)`);
+    
+    return progress;
+  }
+
+  /**
+   * Complete the current step with the specified response status
+   * @param responseStatus - The response status for the completed step
+   * @returns Whether the step was completed successfully
+   */
+  public completeCurrentStep(responseStatus: 'threshold' | 'no_response' | 'not_tested'): boolean {
+    if (!this.currentSession || this.currentSession.currentStep === undefined) {
+      console.error('Cannot complete step: No current session or step');
+      return false;
+    }
+    
+    const stepIndex = this.currentSession.currentStep;
+    if (stepIndex < 0 || stepIndex >= this.currentSession.testSequence.length) {
+      console.error(`Invalid step index: ${stepIndex}`);
+      return false;
+    }
+    
+    // Mark the step as completed with the specified responseStatus
+    this.currentSession.testSequence[stepIndex].completed = true;
+    this.currentSession.testSequence[stepIndex].responseStatus = responseStatus;
+    
+    console.log(`Marked step ${stepIndex} as completed with responseStatus='${responseStatus}'`);
+    
+    return true;
   }
 }
 

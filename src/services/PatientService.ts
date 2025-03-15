@@ -472,9 +472,12 @@ class PatientService {
    * @returns Random hearing level
    */
   private getRandomLevel(min: number, max: number): number {
+    // Ensure minimum threshold is 5 dB for more realistic audiometry
+    min = Math.max(5, min);
+    
     // Round to nearest 5
     const value = Math.round((Math.random() * (max - min) + min) / 5) * 5;
-    return Math.min(120, Math.max(-10, value));
+    return Math.min(120, Math.max(5, value));
   }
 
   /**
