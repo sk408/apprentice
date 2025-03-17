@@ -6,8 +6,8 @@ alwaysApply: true
 # Audiometry Trainer Project Rules
 
 ## Project Structure
-- This is a React TypeScript application for audiometry training
-- Uses React Router for navigation
+- This is a Vite TypeScript application for audiometry training
+- Recently updated from CRA
 - Employs MUI (Material UI) for UI components
 - Uses Three.js for 3D rendering (specifically for ear models)
 - Uses Chart.js and Recharts for data visualization
@@ -120,7 +120,7 @@ interface ThemeContextProps {
 ```
 
 ## Domain-Specific Knowledge
-- Frequency is measured in Hz (125, 250, 500, 1000, 2000, 4000, 8000)
+- Frequency is measured in Hz (125, 250, 500, 750, 1000, 1500, 2000, 3000, 4000, 6000, 8000)
 - Hearing level is measured in dB HL (decibels Hearing Level)
 - Air conduction testing uses symbols: 'O' for right ear, 'X' for left ear
 - Bone conduction testing uses symbols: '<' for right ear, '>' for left ear

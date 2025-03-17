@@ -27,7 +27,7 @@ export const EquipmentImages = {
 export const OtoscopyImages = {
   technique: '/audiometry_trainer/assets/otoscopy.webp',
   normalTympanicMembrane: '/audiometry_trainer/assets/TM.jpg',
-  earCanal: 'https://placeholder.com/ear-canal', // Placeholder
+  earCanal: '/audiometry_trainer/assets/ear_canal.jpg', 
   otitisMedia: '/audiometry_trainer/assets/OM.jpg',
   cerumenImpaction: '/audiometry_trainer/assets/impacted.webp',
   perforatedTM: '/audiometry_trainer/assets/perforation.webp',
