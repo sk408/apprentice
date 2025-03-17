@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,12 +15,18 @@ export default defineConfig({
         // Additional Babel presets if needed
         presets: [],
       }
-    })
+    }),
+    visualizer({
+      open: false,
+      filename: 'stats.html',
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
   resolve: {
     alias: {
       // Set up any path aliases you might have in your tsconfig
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(process.cwd(), 'src'),
     },
   },
   // Configure global environment variables similar to how CRA does it
@@ -29,9 +36,48 @@ export default defineConfig({
   // For GitHub Pages deployment
   base: '/audiometry_trainer/',
   build: {
-    outDir: 'build', // Match CRA output dir
+    outDir: 'build',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': [
+            'react', 
+            'react-dom', 
+            'react-router-dom',
+          ],
+          'vendor-mui': [
+            '@mui/material', 
+            '@mui/icons-material', 
+            '@emotion/react', 
+            '@emotion/styled'
+          ],
+          'vendor-three': [
+            'three', 
+            '@react-three/fiber', 
+            '@react-three/drei'
+          ],
+          'vendor-charts': [
+            'chart.js', 
+            'react-chartjs-2', 
+            'recharts'
+          ],
+          'vendor-utils': [
+            'uuid', 
+            'html2canvas', 
+            'jspdf', 
+            'qrcode.react'
+          ],
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+      },
+    },
+    target: 'es2020',
+    chunkSizeWarningLimit: 1000,
   },
   server: {
-    port: 3000, // Match CRA default port
+    port: 3000,
   },
 }); 

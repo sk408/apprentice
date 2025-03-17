@@ -7,10 +7,12 @@ alwaysApply: true
 
 ## Project Structure
 - This is a Vite TypeScript application for audiometry training
-- Recently updated from CRA
-- Employs MUI (Material UI) for UI components
-- Uses Three.js for 3D rendering (specifically for ear models)
+- Recently migrated from Create React App (CRA) to Vite
+- Employs MUI v6 (Material UI) for UI components
+- Uses Three.js with React Three Fiber/Drei for 3D rendering (specifically for ear models)
 - Uses Chart.js and Recharts for data visualization
+- Uses React Router v7 for navigation
+- Implements code splitting with lazy loading for improved performance
 
 ## Component Organization
 - `src/components/` contains reusable UI components
@@ -19,6 +21,7 @@ alwaysApply: true
 - `src/hooks/` contains custom React hooks
 - `src/types/` and `src/interfaces/` contain TypeScript type definitions
 - `src/constants/` contains app-wide constants and configuration
+- `src/assets/` contains static assets like images
 
 ## Code Conventions
 - React functional components with hooks are preferred
@@ -27,26 +30,33 @@ alwaysApply: true
 - Components should have focused responsibilities (single responsibility principle)
 - MUI components should be used for consistent styling
 - Chart components should use a consistent color scheme
+- Lazy loading is used for route-level components to improve initial load time
 
 ## Project-Specific Guidelines
 - Audiogram component handles auditory test data visualization
 - Testing interface components manage user interaction during tests
-- 3D ear models use Three.js through React Three Fiber
+- 3D ear models use Three.js through React Three Fiber and Drei
 - Patient data follows specific medical terminology and structure
 - REMChart handles Real Ear Measurement visualization
+- Theme context provides accessibility features including high-contrast and font size options
+- Comprehensive modules for otoscopy, ear anatomy, and troubleshooting guides
 
 ## Important Files
-- `src/App.tsx` - Main application routes
+- `src/App.tsx` - Main application routes and structure
 - `src/components/TestingInterface.tsx` - Core testing functionality
 - `src/components/Audiogram.tsx` - Visualizes audiometry results
-- `src/components/ThemeContext.tsx` - Theme management
+- `src/components/ThemeContext.tsx` - Theme and accessibility management
+- `src/components/ThemeProvider.tsx` - MUI theme implementation
 - `src/components/GuidancePanel.tsx` - User instructions and guidance
+- `src/components/EarModel3D.tsx` - 3D ear model visualization
 
 ## Common Patterns
-- Use of useState and useEffect for state management
-- Context API for theme and possibly other global states
+- Use of useState and useEffect for component state management
+- Context API for theme, settings, and accessibility features
+- Lazy loading with Suspense for code splitting and performance optimization
 - Pages typically contain layout and pull in specific feature components
 - 3D components handle their own state but may receive config props
+- Local storage for persisting user settings and preferences
 
 ## Code Examples
 
@@ -103,7 +113,7 @@ interface AudiogramProps {
 ```
 
 ### Theme Context
-The application uses React Context for theme management:
+The application uses React Context for theme management and accessibility features:
 ```tsx
 interface ThemeContextProps {
   darkMode: boolean;
@@ -126,3 +136,4 @@ interface ThemeContextProps {
 - Bone conduction testing uses symbols: '<' for right ear, '>' for left ear
 - Real Ear Measurement (REM) helps verify hearing aid fitting
 - Otoscopy refers to examination of the ear canal and ear drum
+- Contour test evaluates speech recognition thresholds

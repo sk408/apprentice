@@ -1,8 +1,12 @@
-import { useRef, useState, useEffect, Suspense } from 'react';
+import { useRef, useState, useEffect, Suspense, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Environment, useGLTF, Html } from '@react-three/drei';
-import { Box, CircularProgress, Chip, ToggleButton, ToggleButtonGroup, Typography, Paper, Alert, Button, Link } from '@mui/material';
-import { Group } from 'three';
+import { OrbitControls, Environment, Html } from '@react-three/drei';
+import { Box, CircularProgress, Chip, ToggleButton, ToggleButtonGroup, Typography, Paper, Alert, Button, Link, Tooltip, IconButton } from '@mui/material';
+import { Group, TOUCH } from 'three';
+import { useGLTF } from '@react-three/drei';
+import { getModelPath } from '../constants/MediaAssets';
+import * as THREE from 'three';
+import InfoIcon from '@mui/icons-material/Info';
 
 // Custom OrbitControls with reset functionality
 interface OrbitControlsWithResetProps {
@@ -12,6 +16,12 @@ interface OrbitControlsWithResetProps {
   minDistance?: number;
   maxDistance?: number;
   autoRotate?: boolean;
+  touches?: {
+    ONE?: TOUCH;
+    TWO?: TOUCH;
+  };
+  rotateSpeed?: number;
+  zoomSpeed?: number;
 }
 
 function OrbitControlsWithReset(props: OrbitControlsWithResetProps) {
@@ -36,7 +46,7 @@ function OrbitControlsWithReset(props: OrbitControlsWithResetProps) {
     };
   }, [camera]);
   
-  // Pass the props directly without args
+  // Pass all props including touches
   return <OrbitControls ref={controlsRef} {...props} />;
 }
 
@@ -65,6 +75,9 @@ const getAssetPath = (assetPath: string) => {
   return `${baseUrl}${assetPath.startsWith('/') ? '' : '/'}${assetPath}`;
 };
 
+// Preload the model to avoid waterfall loading
+useGLTF.preload(getModelPath('mainEar'));
+
 // Model component for the ear with error handling
 function EarModel({ 
   modelPath, 
@@ -85,8 +98,7 @@ function EarModel({
   const [hoveredPart, setHoveredPart] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<any>(null);
   
-  // Move useGLTF hook call to the top level
-  // React-three-fiber will handle errors internally
+  // Use useMemo to prevent unnecessary re-renders
   const { scene: model, ...gltfResult } = useGLTF(modelPath);
   
   // Use a separate useEffect for error handling since useGLTF doesn't accept an error callback
@@ -184,6 +196,55 @@ function EarModel({
   );
 }
 
+// Create separate Canvas component to improve code splitting
+const ModelCanvas = ({ 
+  modelPath, 
+  activePart, 
+  onError,
+  onLoaded,
+  mobileControls = true
+}: { 
+  modelPath: string; 
+  activePart: string;
+  onError: (error: any) => void;
+  onLoaded: () => void;
+  mobileControls?: boolean;
+}) => {
+  return (
+    <Canvas
+      camera={{ position: [0, 0, 5], fov: 45 }}
+      style={{ 
+        background: 'linear-gradient(to bottom, #e0f7fa, #ffffff)' 
+      }}
+      onCreated={() => onLoaded()}
+    >
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      <Suspense fallback={<Html center><CircularProgress /></Html>}>
+        <EarModel 
+          modelPath={modelPath} 
+          activePart={activePart} 
+          onError={onError}
+        />
+        <Environment preset="city" />
+      </Suspense>
+      <OrbitControlsWithReset
+        enablePan={mobileControls}
+        minDistance={3} 
+        maxDistance={8} 
+        enableRotate={true}
+        enableZoom={true}
+        rotateSpeed={1.0}
+        zoomSpeed={1.2}
+        touches={{
+          ONE: mobileControls ? TOUCH.ROTATE : TOUCH.ROTATE,
+          TWO: mobileControls ? TOUCH.DOLLY_PAN : TOUCH.DOLLY_PAN
+        }}
+      />
+    </Canvas>
+  );
+};
+
 // Main 3D ear model component
 const EarModel3D: React.FC<{ height?: string | number }> = ({ height = 400 }) => {
   const [loading, setLoading] = useState(true);
@@ -191,23 +252,20 @@ const EarModel3D: React.FC<{ height?: string | number }> = ({ height = 400 }) =>
   const [hoveredPart, setHoveredPart] = useState<string | null>(null);
   const [modelError, setModelError] = useState<any>(null);
   
-  const handlePartChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newPart: string,
-  ) => {
-    if (newPart !== null) {
-      setActivePart(newPart);
-    }
-  };
+  // Memoize the model path to prevent unnecessary recalculations
+  const modelPath = useMemo(() => getModelPath('mainEar'), []);
 
   const handleModelError = (error: any) => {
     setModelError(error);
     setLoading(false);
   };
   
+  const handleModelLoaded = () => {
+    setLoading(false);
+  };
+
   // Function to verify the model file exists
   const verifyModelExists = async () => {
-    const modelPath = getAssetPath('/assets/Main_ear_default.glb');
     try {
       const response = await fetch(modelPath, { method: 'HEAD' });
       if (response.ok) {
@@ -230,7 +288,6 @@ const EarModel3D: React.FC<{ height?: string | number }> = ({ height = 400 }) =>
         gap: 2
       }}
     >
-
       {/* 3D viewer */}
       <Box
         sx={{
@@ -252,9 +309,9 @@ const EarModel3D: React.FC<{ height?: string | number }> = ({ height = 400 }) =>
               right: 0,
               bottom: 0,
               display: 'flex',
-              alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: 'white',
+              alignItems: 'center',
+              bgcolor: 'rgba(255, 255, 255, 0.7)',
               zIndex: 1,
             }}
           >
@@ -265,98 +322,45 @@ const EarModel3D: React.FC<{ height?: string | number }> = ({ height = 400 }) =>
         {modelError ? (
           <Box
             sx={{
+              width: '100%',
               height: '100%',
               display: 'flex',
-              alignItems: 'center',
+              flexDirection: 'column',
               justifyContent: 'center',
-              p: 2,
-              bgcolor: 'white',
+              alignItems: 'center',
+              p: 3,
             }}
           >
-            <Alert severity="error" sx={{ width: '100%' }}>
-              <Typography variant="subtitle1" fontWeight="bold">Could not load 3D ear model</Typography>
-              <Typography variant="body2">
-                Please check that the file exists at {getAssetPath('/assets/Main_ear_default.glb')}
-              </Typography>
-              <Typography variant="caption" component="pre" sx={{ 
-                mt: 1, 
-                p: 1, 
-                bgcolor: 'rgba(0,0,0,0.05)', 
-                borderRadius: 1,
-                overflow: 'auto',
-                maxWidth: '100%'
-              }}>
-                {modelError.toString()}
-              </Typography>
-              <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                <Button size="small" variant="outlined" color="primary" onClick={verifyModelExists}>
-                  Check if model file exists
-                </Button>
-                <Button 
-                  size="small" 
-                  variant="outlined" 
-                  color="secondary" 
-                  component={Link}
-                  href={getAssetPath('/assets/Main_ear_default.glb')} 
-                  target="_blank"
-                >
-                  Open model file directly
-                </Button>
-              </Box>
-            </Alert>
+            <Typography variant="subtitle1" fontWeight="bold">Could not load 3D ear model</Typography>
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              onClick={verifyModelExists}
+              sx={{ mt: 2 }}
+            >
+              Check Model Availability
+            </Button>
           </Box>
         ) : (
-          <Canvas
-            camera={{ position: [0, 0, 5], fov: 45 }}
-            onCreated={() => setLoading(false)}
-            style={{ background: 'white' }}
-            fallback={
-              <Box sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                p: 2, 
-                textAlign: 'center' 
-              }}>
-                <Typography>
-                  Your browser may not fully support 3D content. 
-                  <br />
-                  Please try using a browser like Chrome, Firefox or Edge.
-                </Typography>
-              </Box>
-            }
-          >
-            <Suspense fallback={null}>
-              <ambientLight intensity={0.7} />
-              <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-              <EarModel 
-                modelPath={getAssetPath('/assets/Main_ear_default.glb')} 
-                activePart={activePart}
-                onPartHover={setHoveredPart}
-                onError={handleModelError}
-              />
-              <OrbitControlsWithReset 
-                enablePan={true}
-                enableZoom={true}
-                enableRotate={true}
-                minDistance={2}
-                maxDistance={30}
-                autoRotate={false}
-              />
-              <Environment preset="city" />
-            </Suspense>
-          </Canvas>
+          <Suspense fallback={<CircularProgress />}>
+            <ModelCanvas 
+              modelPath={modelPath} 
+              activePart={activePart}
+              onError={handleModelError}
+              onLoaded={handleModelLoaded}
+              mobileControls={true}
+            />
+          </Suspense>
         )}
       </Box>
       
-      {!modelError && (
-        <Box sx={{ mt: 1 }}>
-          <Typography variant="caption" color="text.secondary" align="center" display="block">
-            Controls: Rotate (click and drag) | Zoom (scroll wheel) | Pan (Ctrl + drag) | Reset (press 'R' key)
-          </Typography>
-        </Box>
-      )}
+      {/* Touch controls instructions */}
+      <Paper elevation={1} sx={{ p: 1, borderRadius: 1, mb: 1, display: 'flex', alignItems: 'center' }}>
+        <InfoIcon fontSize="small" color="info" sx={{ mr: 1 }} />
+        <Typography variant="body2" color="text.secondary">
+          Controls: One finger to rotate, two fingers to zoom/pan
+        </Typography>
+      </Paper>
     </Box>
   );
 };
