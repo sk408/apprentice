@@ -86,6 +86,19 @@ src/
 - **Recharts 2.15.1**: Flexible charting library for advanced visualizations
 - **Web Audio API**: Browser API used for generating calibrated audio tones
 - **Three.js 0.174.0**: JavaScript 3D library for creating the ear anatomy model
+- **Vite 5.0.10**: Fast, modern frontend build tool replacing Create React App
+
+### Build System
+
+The application has been migrated from Create React App (CRA) to Vite for improved performance and developer experience. Benefits include:
+
+- Significantly faster development server startup
+- Faster hot module replacement (HMR)
+- Improved build times, especially for 3D components
+- Better error messages and development feedback
+- No need to eject for configuration changes
+
+For more details on the migration, see [VITE-MIGRATION.md](./VITE-MIGRATION.md).
 
 ### Key Features Implementation
 
@@ -142,6 +155,16 @@ The application uses browser local storage to save:
 4. Open your browser and navigate to:
    ```
    http://localhost:3000
+   ```
+
+5. To build for production:
+   ```
+   npm run build
+   ```
+
+6. To preview the production build locally:
+   ```
+   npm run preview
    ```
 
 ## Usage Guide

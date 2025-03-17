@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Button, Typography, LinearProgress, Tooltip } from '@mui/material';
 import { VolumeUp, VolumeOff } from '@mui/icons-material';
 

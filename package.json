@@ -27,7 +27,6 @@
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",
-    "react-scripts": "5.0.1",
     "recharts": "^2.15.1",
     "three": "^0.174.0",
     "typescript": "^4.9.5",
@@ -35,10 +34,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build -r https://github.com/sk408/audiometry_trainer.git"
   },
@@ -62,6 +62,10 @@
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0",
-    "gh-pages": "^6.3.0"
+    "@vitejs/plugin-react": "^4.2.1",
+    "gh-pages": "^6.3.0",
+    "jsdom": "^26.0.0",
+    "vite": "^5.0.10",
+    "vitest": "^1.0.4"
   }
 }

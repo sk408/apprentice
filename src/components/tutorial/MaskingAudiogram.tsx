@@ -1,10 +1,10 @@
-import React from 'react';
 import {
   Box,
   Paper,
   Typography,
   useTheme
 } from '@mui/material';
+import { Fragment } from 'react';
 
 // Define the threshold type for our component
 interface ThresholdPoint {
@@ -189,7 +189,7 @@ const MaskingAudiogram: React.FC<MaskingAudiogramProps> = ({
           const isHighlighted = highlightFrequency === freq;
           
           return (
-            <React.Fragment key={`freq-${freq}`}>
+            <Fragment key={`freq-${freq}`}>
               <Box
                 sx={{
                   position: 'absolute',
@@ -214,7 +214,7 @@ const MaskingAudiogram: React.FC<MaskingAudiogramProps> = ({
               >
                 {formatFrequency(freq)}
               </Typography>
-            </React.Fragment>
+            </Fragment>
           );
         })}
         
@@ -223,7 +223,7 @@ const MaskingAudiogram: React.FC<MaskingAudiogramProps> = ({
           const y = (index / (levels.length - 1)) * 100;
           
           return (
-            <React.Fragment key={`level-${level}`}>
+            <Fragment key={`level-${level}`}>
               <Box
                 sx={{
                   position: 'absolute',
@@ -247,7 +247,7 @@ const MaskingAudiogram: React.FC<MaskingAudiogramProps> = ({
               >
                 {level}
               </Typography>
-            </React.Fragment>
+            </Fragment>
           );
         })}
         
@@ -266,41 +266,43 @@ const MaskingAudiogram: React.FC<MaskingAudiogramProps> = ({
           if (point.testType === 'ac') {
             // Circle for air conduction
             return (
-              <Box
-                key={`point-${index}`}
-                sx={{
-                  position: 'absolute',
-                  left: `${pos.x}%`,
-                  top: `${pos.y}%`,
-                  width: size,
-                  height: size,
-                  borderRadius: '50%',
-                  bgcolor: color,
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 2,
-                  border: isHighlighted ? `2px solid ${theme.palette.background.paper}` : 'none',
-                  boxShadow: isHighlighted ? '0 0 0 1px rgba(0,0,0,0.2)' : 'none'
-                }}
-              />
+              <Fragment key={`point-${index}`}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    left: `${pos.x}%`,
+                    top: `${pos.y}%`,
+                    width: size,
+                    height: size,
+                    borderRadius: '50%',
+                    bgcolor: color,
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 2,
+                    border: isHighlighted ? `2px solid ${theme.palette.background.paper}` : 'none',
+                    boxShadow: isHighlighted ? '0 0 0 1px rgba(0,0,0,0.2)' : 'none'
+                  }}
+                />
+              </Fragment>
             );
           } else {
             // Square for bone conduction
             return (
-              <Box
-                key={`point-${index}`}
-                sx={{
-                  position: 'absolute',
-                  left: `${pos.x}%`,
-                  top: `${pos.y}%`,
-                  width: size,
-                  height: size,
-                  bgcolor: 'transparent',
-                  border: `2px solid ${color}`,
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 2,
-                  boxShadow: isHighlighted ? '0 0 0 2px rgba(255,255,255,0.8), 0 0 0 3px rgba(0,0,0,0.2)' : 'none'
-                }}
-              />
+              <Fragment key={`point-${index}`}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    left: `${pos.x}%`,
+                    top: `${pos.y}%`,
+                    width: size,
+                    height: size,
+                    bgcolor: 'transparent',
+                    border: `2px solid ${color}`,
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 2,
+                    boxShadow: isHighlighted ? '0 0 0 2px rgba(255,255,255,0.8), 0 0 0 3px rgba(0,0,0,0.2)' : 'none'
+                  }}
+                />
+              </Fragment>
             );
           }
         })}

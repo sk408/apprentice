@@ -4,7 +4,18 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      // Enable React automatic JSX runtime
+      jsxRuntime: 'automatic',
+      // Babel configuration if needed
+      babel: {
+        plugins: [],
+        // Additional Babel presets if needed
+        presets: [],
+      }
+    })
+  ],
   resolve: {
     alias: {
       // Set up any path aliases you might have in your tsconfig

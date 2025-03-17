@@ -11,7 +11,7 @@ import {
   allQuestions
 } from '../constants/questions'; 
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Container, 
   Typography, 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, LinearProgress, Typography, Paper, Chip } from '@mui/material';
 import { TestStep } from '../../interfaces/AudioTypes';
 

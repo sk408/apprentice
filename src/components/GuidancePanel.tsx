@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { Paper, Typography, Box, Chip, Button, Divider, Alert, List, ListItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
 import { styled, keyframes, useTheme } from '@mui/material/styles';
 import { alpha } from '@mui/material/styles';

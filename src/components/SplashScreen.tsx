@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box } from '@mui/material';
 import { useThemeContext } from './ThemeContext';
 import logo from '../logo512.png';

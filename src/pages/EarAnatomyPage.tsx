@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -182,7 +182,7 @@ const EarAnatomyPage: React.FC = () => {
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                Explore this interactive 3D model of the human ear. Click and drag to rotate, scroll to zoom.
+                Explore this interactive 3D model of the human ear. Controls: Rotate (click and drag) | Zoom (scroll wheel) | Pan (Ctrl + drag) | Reset (press 'R' key)
               </Typography>
               <EarModel3D height={450} />
             </Box>

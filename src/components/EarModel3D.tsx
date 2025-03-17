@@ -1,8 +1,44 @@
-import React, { useRef, useState, useEffect, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { useRef, useState, useEffect, Suspense } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment, useGLTF, Html } from '@react-three/drei';
 import { Box, CircularProgress, Chip, ToggleButton, ToggleButtonGroup, Typography, Paper, Alert, Button, Link } from '@mui/material';
 import { Group } from 'three';
+
+// Custom OrbitControls with reset functionality
+interface OrbitControlsWithResetProps {
+  enablePan?: boolean;
+  enableZoom?: boolean;
+  enableRotate?: boolean;
+  minDistance?: number;
+  maxDistance?: number;
+  autoRotate?: boolean;
+}
+
+function OrbitControlsWithReset(props: OrbitControlsWithResetProps) {
+  const { camera, gl } = useThree();
+  const controlsRef = useRef<any>(null);
+  const initialPosition = useRef<[number, number, number]>([0, 0, 5]); // Store initial camera position
+  
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'r') {
+        // Reset camera position
+        if (controlsRef.current) {
+          camera.position.set(initialPosition.current[0], initialPosition.current[1], initialPosition.current[2]);
+          controlsRef.current.reset();
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [camera]);
+  
+  // Pass the props directly without args
+  return <OrbitControls ref={controlsRef} {...props} />;
+}
 
 // Parts of the ear that can be highlighted
 const earParts = [
@@ -17,16 +53,16 @@ const earParts = [
 
 // Helper function to get the correct asset path
 const getAssetPath = (assetPath: string) => {
-  // Read the homepage from package.json's PUBLIC_URL
-  const publicUrl = process.env.PUBLIC_URL || '';
+  // Read the base URL from Vite environment variables
+  const baseUrl = import.meta.env.BASE_URL || '';
   
-  // If the path already starts with the public URL, return it as is
-  if (assetPath.startsWith(publicUrl)) {
+  // If the path already starts with the base URL, return it as is
+  if (assetPath.startsWith(baseUrl)) {
     return assetPath;
   }
   
-  // Otherwise, join the public URL with the asset path
-  return `${publicUrl}${assetPath.startsWith('/') ? '' : '/'}${assetPath}`;
+  // Otherwise, join the base URL with the asset path
+  return `${baseUrl}${assetPath.startsWith('/') ? '' : '/'}${assetPath}`;
 };
 
 // Model component for the ear with error handling
@@ -300,12 +336,12 @@ const EarModel3D: React.FC<{ height?: string | number }> = ({ height = 400 }) =>
                 onPartHover={setHoveredPart}
                 onError={handleModelError}
               />
-              <OrbitControls 
+              <OrbitControlsWithReset 
                 enablePan={true}
                 enableZoom={true}
                 enableRotate={true}
                 minDistance={2}
-                maxDistance={10}
+                maxDistance={30}
                 autoRotate={false}
               />
               <Environment preset="city" />
@@ -317,7 +353,7 @@ const EarModel3D: React.FC<{ height?: string | number }> = ({ height = 400 }) =>
       {!modelError && (
         <Box sx={{ mt: 1 }}>
           <Typography variant="caption" color="text.secondary" align="center" display="block">
-            Use mouse to rotate the model. Scroll to zoom in/out.
+            Controls: Rotate (click and drag) | Zoom (scroll wheel) | Pan (Ctrl + drag) | Reset (press 'R' key)
           </Typography>
         </Box>
       )}

@@ -1,4 +1,3 @@
-import React from 'react';
 import RealEarMeasurementService from '../../services/RealEarMeasurementService';
 import { 
   REMType, REMSignalType, REMLevel, ProbePosition, 

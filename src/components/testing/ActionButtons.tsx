@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Button, Tooltip } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
 

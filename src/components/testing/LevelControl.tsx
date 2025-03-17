@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, IconButton, Typography, Chip, Tooltip } from '@mui/material';
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { TestStep } from '../../interfaces/AudioTypes';

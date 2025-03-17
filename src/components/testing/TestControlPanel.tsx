@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Box, Grid, Button, Typography, Paper, Divider, Tooltip } from '@mui/material';
 import { TestStep } from '../../interfaces/AudioTypes';
 import LevelControl from './LevelControl';

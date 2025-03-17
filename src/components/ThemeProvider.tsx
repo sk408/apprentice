@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   ThemeProvider as MuiThemeProvider, 
   createTheme, 
@@ -70,7 +70,7 @@ export const CustomThemeProvider: React.FC<ThemeProviderProps> = ({ children }) 
   }, []);
 
   // Create theme based on settings
-  const appTheme = React.useMemo(
+  const appTheme = useMemo(
     () =>
       createTheme({
         palette: {

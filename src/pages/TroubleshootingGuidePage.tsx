@@ -1,4 +1,4 @@
-import React, { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -618,7 +618,7 @@ const TroubleshootingGuidePage: React.FC = () => {
   const findCategoryById = (id: string) => TROUBLESHOOTING_CATEGORIES.find(cat => cat.id === id);
 
   // Clean up URL object when the component unmounts or when no longer needed
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (htmlPreviewUrl) {
         URL.revokeObjectURL(htmlPreviewUrl);

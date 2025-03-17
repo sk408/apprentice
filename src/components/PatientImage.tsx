@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Avatar, Typography } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import HearingIcon from '@mui/icons-material/Hearing';
