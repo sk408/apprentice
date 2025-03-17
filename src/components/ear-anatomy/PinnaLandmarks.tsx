@@ -17,8 +17,11 @@ import {
   KeyboardArrowDown
 } from '@mui/icons-material';
 
-// Placeholder for actual images
-const outerEarImg = "https://placeholder.com/ear-outer";
+// Import from MediaAssets
+import { EarAnatomyImages } from '../../constants/MediaAssets';
+
+// Use image from MediaAssets
+const outerEarImg = EarAnatomyImages.pinnaLandmarks;
 
 const PinnaLandmarks: React.FC = () => {
   const theme = useTheme();
@@ -44,14 +47,15 @@ const PinnaLandmarks: React.FC = () => {
       <Card sx={{ mb: 2 }}>
         <CardMedia
           component="img"
-          height="300"
-          image={outerEarImg}
-          alt="Pinna Landmarks"
           sx={{ 
+            height: { xs: 440, sm: 600, md: 700 },
+            maxWidth: '100%',
             objectFit: 'contain', 
             p: 2, 
             bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
           }}
+          image={outerEarImg}
+          alt="Pinna Landmarks"
         />
         <CardContent>
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">

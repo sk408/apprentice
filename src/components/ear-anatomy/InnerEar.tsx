@@ -22,8 +22,11 @@ import {
   KeyboardArrowDown,
 } from '@mui/icons-material';
 
-// Placeholder for actual images
-const innerEarImg = "https://placeholder.com/ear-inner";
+// Import from MediaAssets
+import { EarAnatomyImages } from '../../constants/MediaAssets';
+
+// Use image from MediaAssets
+const innerEarImg = EarAnatomyImages.innerEar;
 
 const InnerEar: React.FC = () => {
   const theme = useTheme();
@@ -80,14 +83,15 @@ const InnerEar: React.FC = () => {
       <Card sx={{ mb: 2 }}>
         <CardMedia
           component="img"
-          height="250"
-          image={innerEarImg}
-          alt="Inner Ear Anatomy"
           sx={{ 
+            height: { xs: 400, sm: 500, md: 600 },
+            maxWidth: '100%',
             objectFit: 'contain', 
             p: 2, 
             bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
           }}
+          image={innerEarImg}
+          alt="Inner Ear Anatomy"
         />
         <CardContent>
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">

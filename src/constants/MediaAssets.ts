@@ -33,6 +33,15 @@ export const OtoscopyImages = {
   perforatedTM: '/audiometry_trainer/assets/perforation.webp',
 };
 
+// Ear Anatomy Images
+export const EarAnatomyImages = {
+  outerEar: '/audiometry_trainer/assets/outer_ear.jpg',
+  middleEar: '/audiometry_trainer/assets/middle_ear.jpg',
+  innerEar: '/audiometry_trainer/assets/inner_ear.jpg',
+  hearingProcess: '/audiometry_trainer/assets/hearing_process.jpg',
+  pinnaLandmarks: '/audiometry_trainer/assets/outer_ear.ppm',
+};
+
 // Documents and Resources
 export const Documents = {
   followUpChecklist: '/assets/follow_up_checklist.html',

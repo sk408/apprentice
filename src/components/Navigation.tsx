@@ -106,19 +106,44 @@ const Navigation: React.FC = () => {
             component={Link} 
             to={item.path}
             sx={{
+              color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
+              textDecoration: 'none',
+              '&:visited': {
+                color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
+              },
               '&.Mui-selected': {
                 bgcolor: 'action.selected',
               },
               '&:hover': {
                 bgcolor: 'action.hover',
+                color: theme.palette.mode === 'dark' ? '#ffffff' : '#000000',
               },
               ...(location.pathname === item.path && {
                 bgcolor: 'action.selected',
+                fontWeight: 'bold',
               }),
             }}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
+            <ListItemIcon 
+              sx={{ 
+                color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                ...(location.pathname === item.path && {
+                  color: theme.palette.primary.main,
+                }),
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText 
+              primary={item.text} 
+              primaryTypographyProps={{
+                sx: {
+                  ...(location.pathname === item.path && {
+                    fontWeight: 'bold',
+                  }),
+                }
+              }}
+            />
           </ListItem>
         ))}
       </List>
@@ -130,8 +155,23 @@ const Navigation: React.FC = () => {
           </ListItemIcon>
           <ListItemText primary={darkMode ? 'Light Mode' : 'Dark Mode'} />
         </ListItem>
-        <ListItem component="a" href="https://github.com/sk408/audiometry_trainer" target="_blank">
-          <ListItemIcon>
+        <ListItem 
+          component="a" 
+          href="https://github.com/sk408/audiometry_trainer" 
+          target="_blank"
+          sx={{
+            color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
+            textDecoration: 'none',
+            '&:visited': {
+              color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.87)',
+            },
+            '&:hover': {
+              bgcolor: 'action.hover',
+              color: theme.palette.mode === 'dark' ? '#ffffff' : '#000000',
+            },
+          }}
+        >
+          <ListItemIcon sx={{ color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }}>
             <HelpIcon />
           </ListItemIcon>
           <ListItemText primary="Help & Resources" />
@@ -169,8 +209,13 @@ const Navigation: React.FC = () => {
                   to={item.path}
                   sx={{ 
                     mx: 0.5,
+                    color: 'inherit',
+                    '&:visited': {
+                      color: 'inherit',
+                    },
                     ...(location.pathname === item.path && {
                       borderBottom: '2px solid white',
+                      fontWeight: 'bold',
                     }),
                   }}
                 >
