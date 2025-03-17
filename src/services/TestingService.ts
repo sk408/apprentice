@@ -22,6 +22,7 @@ class TestingService {
   private currentSession: TestSession | null = null;
   private activeSessions: TestSession[] = [];
   private completedSessions: TestSession[] = [];
+  private falsePositiveCount: number = 0;
 
   // Standard test frequencies in Hz (from low to high)
   // UPDATED: Using the specific frequencies required for air conduction
@@ -521,8 +522,12 @@ class TestingService {
       actualThresholds: actualThresholds, // Include the actual thresholds
       accuracy: accuracy,
       testDuration: this.calculateTestDuration(session),
-      technicalErrors: this.identifyTechnicalErrors(session)
+      technicalErrors: this.identifyTechnicalErrors(session),
+      falsePositives: this.falsePositiveCount
     };
+    
+    // Reset the false positive count for the next session
+    this.falsePositiveCount = 0;
     
     return result;
   }
@@ -796,6 +801,16 @@ class TestingService {
     console.log(`Marked step ${stepIndex} as completed with responseStatus='${responseStatus}'`);
     
     return true;
+  }
+
+  /**
+   * Record a false positive response (patient responded when no tone was presented)
+   * This helps track patient reliability
+   */
+  public recordFalsePositive(): void {
+    // Increment the false positive counter
+    this.falsePositiveCount++;
+    console.log(`False positive recorded. Total: ${this.falsePositiveCount}`);
   }
 }
 

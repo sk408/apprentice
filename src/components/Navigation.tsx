@@ -36,7 +36,8 @@ import {
   Psychology,
   VolumeUp,
   MenuBook,
-  SpeakerPhone
+  SpeakerPhone,
+  BuildCircle
 } from '@mui/icons-material';
 import { useThemeContext } from './ThemeContext';
 
@@ -49,6 +50,8 @@ const menuItems = [
   { text: 'Ear Anatomy', icon: <MenuBook />, path: '/ear-anatomy' },
   { text: 'Otoscopy', icon: <SpeakerPhone />, path: '/otoscopy' },
   { text: 'Real Ear Measurements', icon: <VolumeUp />, path: '/real-ear-measurement' },
+  { text: 'Troubleshooting Guide', icon: <BuildCircle />, path: '/troubleshooting' },
+  { text: 'Comprehensive Exam', icon: <AssessmentIcon />, path: '/exam' },
   // { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
 ];
 

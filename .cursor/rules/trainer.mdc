@@ -1,0 +1,128 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Audiometry Trainer Project Rules
+
+## Project Structure
+- This is a React TypeScript application for audiometry training
+- Uses React Router for navigation
+- Employs MUI (Material UI) for UI components
+- Uses Three.js for 3D rendering (specifically for ear models)
+- Uses Chart.js and Recharts for data visualization
+
+## Component Organization
+- `src/components/` contains reusable UI components
+- `src/pages/` contains route-level page components
+- `src/services/` contains business logic and data fetching
+- `src/hooks/` contains custom React hooks
+- `src/types/` and `src/interfaces/` contain TypeScript type definitions
+- `src/constants/` contains app-wide constants and configuration
+
+## Code Conventions
+- React functional components with hooks are preferred
+- TypeScript interfaces should be used for props and state
+- Component files should be named in PascalCase
+- Components should have focused responsibilities (single responsibility principle)
+- MUI components should be used for consistent styling
+- Chart components should use a consistent color scheme
+
+## Project-Specific Guidelines
+- Audiogram component handles auditory test data visualization
+- Testing interface components manage user interaction during tests
+- 3D ear models use Three.js through React Three Fiber
+- Patient data follows specific medical terminology and structure
+- REMChart handles Real Ear Measurement visualization
+
+## Important Files
+- `src/App.tsx` - Main application routes
+- `src/components/TestingInterface.tsx` - Core testing functionality
+- `src/components/Audiogram.tsx` - Visualizes audiometry results
+- `src/components/ThemeContext.tsx` - Theme management
+- `src/components/GuidancePanel.tsx` - User instructions and guidance
+
+## Common Patterns
+- Use of useState and useEffect for state management
+- Context API for theme and possibly other global states
+- Pages typically contain layout and pull in specific feature components
+- 3D components handle their own state but may receive config props
+
+## Code Examples
+
+### Component Pattern
+Components generally follow this pattern:
+```tsx
+interface ComponentProps {
+  // Props defined with TypeScript interfaces
+  propName: PropType;
+}
+
+const Component: React.FC<ComponentProps> = ({
+  propName,
+  optionalProp = defaultValue
+}) => {
+  // State hooks
+  const [state, setState] = useState<StateType>(initialState);
+  
+  // Effect hooks
+  useEffect(() => {
+    // Effects logic
+  }, [dependencies]);
+  
+  // Helper functions
+  const handleEvent = () => {
+    // Event handling logic
+  };
+  
+  // Component render
+  return (
+    <Container>
+      {/* Component JSX */}
+    </Container>
+  );
+};
+```
+
+### Audiogram Component
+The Audiogram component is central to visualizing hearing test results:
+```tsx
+interface AudiogramProps {
+  thresholds: ThresholdPoint[];
+  width?: number;
+  height?: number;
+  showLegend?: boolean;
+  title?: string;
+  compareThresholds?: ThresholdPoint[]; 
+  currentFrequency?: number;
+  currentLevel?: number;
+  toneActive?: boolean;
+  onPositionClick?: (frequency: number, level: number) => void;
+  interactive?: boolean;
+}
+```
+
+### Theme Context
+The application uses React Context for theme management:
+```tsx
+interface ThemeContextProps {
+  darkMode: boolean;
+  setDarkMode: (mode: boolean) => void;
+  highContrastMode: boolean;
+  setHighContrastMode: (mode: boolean) => void;
+  fontSize: string;
+  setFontSize: (size: string) => void;
+  includeAirConduction: boolean;
+  setIncludeAirConduction: (include: boolean) => void;
+  includeBoneConduction: boolean;
+  setIncludeBoneConduction: (include: boolean) => void;
+}
+```
+
+## Domain-Specific Knowledge
+- Frequency is measured in Hz (125, 250, 500, 1000, 2000, 4000, 8000)
+- Hearing level is measured in dB HL (decibels Hearing Level)
+- Air conduction testing uses symbols: 'O' for right ear, 'X' for left ear
+- Bone conduction testing uses symbols: '<' for right ear, '>' for left ear
+- Real Ear Measurement (REM) helps verify hearing aid fitting
+- Otoscopy refers to examination of the ear canal and ear drum

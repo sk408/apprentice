@@ -156,6 +156,18 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
       // If the session was successfully completed, use that session object
       if (completedSession) {
         console.log('Session completed manually with results:', completedSession.results);
+        // Update the session in useAudioTest hook by calling onComplete
+        // This ensures the session has the completed flag and results with falsePositives
+        if (completedSession.results) {
+          // Create a temporary session object with the completed flag and results for the dialog
+          const tempSession = {
+            ...session,
+            completed: true,
+            results: completedSession.results
+          };
+          // Update the local session variable for the dialog
+          Object.assign(session, tempSession);
+        }
       }
       
       // Display the results dialog
@@ -320,7 +332,20 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
                 variant="contained" 
                 color="primary"
                 startIcon={<AssessmentOutlined />}
-                onClick={() => setShowResultsDialog(true)}
+                onClick={() => {
+                  // Complete the session to get results with false positives
+                  if (session && !session.completed) {
+                    const completedSession = testingService.completeSession();
+                    if (completedSession && completedSession.results) {
+                      // Update the session with completion data for the dialog
+                      Object.assign(session, {
+                        completed: true,
+                        results: completedSession.results
+                      });
+                    }
+                  }
+                  setShowResultsDialog(true);
+                }}
                 sx={{ mb: 1 }}
               >
                 View Detailed Results
@@ -420,6 +445,22 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
                 Below is a comparison between the thresholds you measured and the patient's actual thresholds.
                 This feedback helps you improve your audiometric testing skills.
               </Typography>
+              
+              {/* Add false positives information - only show if test is complete */}
+              {session?.completed && session?.results && (
+                <Alert 
+                  severity={session.results.falsePositives > 5 ? "warning" : "info"} 
+                  sx={{ mb: 2 }}
+                >
+                  <Typography variant="subtitle2">
+                    False Positives: {session.results.falsePositives || 0}
+                  </Typography>
+                  <Typography variant="body2">
+                    False positives occur when a patient indicates hearing a tone when none was presented. 
+                    A high number of false positives ({'>'}5) may indicate an unreliable test subject or a need for clearer instructions.
+                  </Typography>
+                </Alert>
+              )}
               
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>

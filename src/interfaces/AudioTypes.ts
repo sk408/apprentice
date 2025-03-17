@@ -53,6 +53,7 @@ export interface TestResult {
   accuracy: number; // Percentage of accuracy
   testDuration: number; // In seconds
   technicalErrors: string[]; // Description of errors in technique
+  falsePositives: number; // Count of false positive responses
 }
 
 // Test session for tracking progress

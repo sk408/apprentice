@@ -13,9 +13,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Navigation />
       
       <Box component="main" sx={{ flexGrow: 1 }}>
-        {children}
+        <Box sx={{ flexGrow: 1, p: 3 }}>
+          {children}
+        </Box>
       </Box>
-      
+
       <Footer />
     </Box>
   );

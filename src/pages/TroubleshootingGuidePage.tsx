@@ -52,6 +52,8 @@ import {
   Assignment
 } from '@mui/icons-material';
 import QRCode from 'qrcode.react'; // QR code generation for videos and instructions
+import { useNavigate } from 'react-router-dom';
+import { HearingAidBrands, PlatformSupport, QRCodeGenerator } from '../constants/MediaAssets';
 
 // Define type for hearing aid brand
 interface HearingAidBrand {
@@ -89,32 +91,32 @@ const HEARING_AID_BRANDS: HearingAidBrand[] = [
   {
     id: 'jabra',
     name: 'Jabra Enhance Pro 20',
-    logo: '/audiometry_trainer/assets/images/jabra-logo.png',
-    manualUrl: 'https://www.jabra.com/supportpages/jabra-enhance-plus/hsb001/documentation',
-    pairingVideoUrl: 'https://www.youtube.com/watch?v=8rQWLSfpIw4',
-    cleaningVideoUrl: 'https://www.youtube.com/watch?v=_KhxAOxoRkU',
-    batteryUrl: 'https://www.jabra.com/supportpages/jabra-enhance-plus/hsb001/faq/Battery',
-    troubleshootingUrl: 'https://www.jabra.com/supportpages/jabra-enhance-plus/hsb001/troubleshooting',
+    logo: HearingAidBrands.jabra.logo,
+    manualUrl: HearingAidBrands.jabra.manualUrl,
+    pairingVideoUrl: HearingAidBrands.jabra.pairingVideoUrl,
+    cleaningVideoUrl: HearingAidBrands.jabra.cleaningVideoUrl,
+    batteryUrl: HearingAidBrands.jabra.batteryUrl,
+    troubleshootingUrl: HearingAidBrands.jabra.troubleshootingUrl,
   },
   {
     id: 'rexton',
     name: 'Rexton Reach',
-    logo: '/audiometry_trainer/assets/images/rexton-logo.png',
-    manualUrl: 'https://www.rexton.com/en-us/help/user-guides',
-    pairingVideoUrl: 'https://www.youtube.com/watch?v=8KU-g_xCY3I',
-    cleaningVideoUrl: 'https://www.youtube.com/watch?v=f0KlA_HWz6M',
-    batteryUrl: 'https://www.rexton.com/en-us/help/how-to-videos/battery-change',
-    troubleshootingUrl: 'https://www.rexton.com/en-us/help/troubleshooting',
+    logo: HearingAidBrands.rexton.logo,
+    manualUrl: HearingAidBrands.rexton.manualUrl,
+    pairingVideoUrl: HearingAidBrands.rexton.pairingVideoUrl,
+    cleaningVideoUrl: HearingAidBrands.rexton.cleaningVideoUrl,
+    batteryUrl: HearingAidBrands.rexton.batteryUrl,
+    troubleshootingUrl: HearingAidBrands.rexton.troubleshootingUrl,
   },
   {
     id: 'philips',
     name: 'Philips 9050',
-    logo: '/audiometry_trainer/assets/images/philips-logo.png',
-    manualUrl: 'https://www.hearingsolutions.philips.com/en-us/support-for-professionals/user-guides',
-    pairingVideoUrl: 'https://www.youtube.com/watch?v=pxfJWR8EcTQ',
-    cleaningVideoUrl: 'https://www.youtube.com/watch?v=zTH5PoneoIU',
-    batteryUrl: 'https://www.hearingsolutions.philips.com/en-us/support-for-professionals/how-to-videos/changing-hearing-aid-battery',
-    troubleshootingUrl: 'https://www.hearingsolutions.philips.com/en-us/support-for-professionals/troubleshooting-guide',
+    logo: HearingAidBrands.philips.logo,
+    manualUrl: HearingAidBrands.philips.manualUrl,
+    pairingVideoUrl: HearingAidBrands.philips.pairingVideoUrl,
+    cleaningVideoUrl: HearingAidBrands.philips.cleaningVideoUrl,
+    batteryUrl: HearingAidBrands.philips.batteryUrl,
+    troubleshootingUrl: HearingAidBrands.philips.troubleshootingUrl,
   }
 ];
 
@@ -134,37 +136,35 @@ const TROUBLESHOOTING_CATEGORIES: TroubleshootingCategory[] = [
   },
   {
     id: 'bluetooth',
-    title: 'Bluetooth Not Connecting',
+    title: 'Bluetooth Pairing Issues',
     icon: <BluetoothConnected />,
     steps: [
-      "Make sure Bluetooth is enabled on your device",
-      "Ensure hearing aids are powered on and in pairing mode",
-      "Try restarting your phone/device",
-      "Try restarting your hearing aids (open/close battery door or place in charger)",
-      "Forget the device in Bluetooth settings and re-pair"
+      'Ensure the hearing aid is charged and turned on.',
+      'Turn Bluetooth on in your device settings.',
+      'Put the hearing aid in pairing mode according to the manual.',
+      'Open the hearing aid app if applicable and follow the connection steps.',
+      'If pairing fails, restart both your device and the hearing aid.',
     ],
     platformSpecific: {
       ios: {
-        title: "iOS Pairing Instructions",
+        title: 'iOS Specific Steps',
         steps: [
-          "Go to Settings > Accessibility > Hearing Devices",
-          "Make sure Bluetooth is turned on",
-          "Put hearing aids in pairing mode (open/close battery door or press pairing button)",
-          "Select your hearing aids when they appear",
-          "Tap 'Pair' when prompted"
+          'Go to Settings > Accessibility > Hearing Devices',
+          'Wait for your iPhone to detect your hearing aids',
+          'When your hearing aid appears, tap on it and follow the pairing request',
+          'If needed, confirm the pairing request on both devices'
         ],
-        url: "https://support.apple.com/en-us/HT201466"
+        url: PlatformSupport.ios.url
       },
       android: {
-        title: "Android Pairing Instructions",
+        title: 'Android Specific Steps',
         steps: [
-          "Go to Settings > Connected devices > Pair new device",
-          "Make sure Bluetooth is turned on",
-          "Put hearing aids in pairing mode (open/close battery door or press pairing button)",
-          "Select your hearing aids when they appear",
-          "Tap 'Pair' when prompted"
+          'Go to Settings > Connected Devices > Pair new device',
+          'Ensure your hearing aid is in pairing mode',
+          'When your hearing aid appears in the list, tap it to pair',
+          'Accept any pairing requests that appear'
         ],
-        url: "https://support.google.com/android/answer/9075925?hl=en"
+        url: PlatformSupport.android.url
       }
     }
   },
@@ -206,9 +206,32 @@ const TROUBLESHOOTING_CATEGORIES: TroubleshootingCategory[] = [
   }
 ];
 
-const generateGuideHTML = (brand: string, selectedCategory: string | undefined = undefined): string => {
+// Convert image URL to data URL for embedding in HTML
+const imageToDataUrl = async (imageUrl: string): Promise<string> => {
+  try {
+    // Fetch the image
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    
+    // Convert to base64
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Failed to convert image to data URL:', error);
+    return imageUrl; // Fall back to original URL if conversion fails
+  }
+};
+
+const generateGuideHTML = async (brand: string, selectedCategory: string | undefined = undefined): Promise<string> => {
   const brandInfo = HEARING_AID_BRANDS.find(b => b.id === brand);
   if (!brandInfo) return '';
+
+  // Convert logo to data URL for embedding
+  const logoDataUrl = await imageToDataUrl(brandInfo.logo);
 
   const categories = selectedCategory 
     ? TROUBLESHOOTING_CATEGORIES.filter(c => c.id === selectedCategory)
@@ -229,6 +252,8 @@ const generateGuideHTML = (brand: string, selectedCategory: string | undefined =
       }
       body {
         font-size: 12pt;
+        margin: 0;
+        padding: 0;
       }
       .no-print {
         display: none;
@@ -237,13 +262,34 @@ const generateGuideHTML = (brand: string, selectedCategory: string | undefined =
         page-break-after: always;
       }
       .qr-code {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
+        max-width: 100%;
+      }
+      .logo {
+        max-width: 120px;
+      }
+      
+      /* Control page breaks */
+      .troubleshooting-section {
+        page-break-inside: avoid;
+      }
+      
+      .platform-specific {
+        page-break-inside: avoid;
+      }
+      
+      h2, h3, h4, h5 {
+        page-break-after: avoid;
+      }
+      
+      .resources {
+        page-break-inside: avoid;
       }
     }
     
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       line-height: 1.6;
       color: #333;
       max-width: 800px;
@@ -252,24 +298,31 @@ const generateGuideHTML = (brand: string, selectedCategory: string | undefined =
     }
     
     h1 {
-      color: #2c3e50;
-      border-bottom: 2px solid #3498db;
+      color: #1a365d;
+      border-bottom: 2px solid #3182ce;
       padding-bottom: 10px;
+      font-weight: 600;
     }
     
     h2 {
-      color: #2980b9;
+      color: #2c5282;
       margin-top: 30px;
+      font-weight: 600;
     }
     
     h3 {
-      color: #34495e;
+      color: #2a4365;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 15px;
     }
     
     .header {
       display: flex;
       align-items: center;
       margin-bottom: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 15px;
     }
     
     .logo {
@@ -279,46 +332,93 @@ const generateGuideHTML = (brand: string, selectedCategory: string | undefined =
     
     .troubleshooting-section {
       margin-bottom: 30px;
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 5px;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      background-color: #fff;
     }
     
-    ol, ul {
-      margin-left: 20px;
+    ol {
+      margin-left: 0;
+      padding-left: 25px;
       margin-bottom: 20px;
+      counter-reset: item;
+      list-style-type: none;
     }
     
-    li {
+    ol li {
+      position: relative;
+      margin-bottom: 12px;
+      padding-left: 10px;
+      counter-increment: item;
+      line-height: 1.5;
+    }
+    
+    ol li:before {
+      content: counter(item) ".";
+      position: absolute;
+      left: -25px;
+      width: 22px;
+      text-align: right;
+      font-weight: bold;
+      color: #3182ce;
+    }
+    
+    ul {
+      margin-left: 0;
+      padding-left: 25px;
+      margin-bottom: 20px;
+      list-style-type: square;
+    }
+    
+    ul li {
       margin-bottom: 8px;
+      padding-left: 5px;
     }
     
     .resources {
-      background-color: #f8f9fa;
+      background-color: #f8fafc;
       padding: 15px;
-      border-radius: 5px;
-      margin-top: 30px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid #e2e8f0;
     }
     
-    .qr-section {
+    .resources h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    
+    .qr-resources {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 20px;
+      justify-content: space-around;
+      gap: 10px;
     }
     
     .qr-item {
       text-align: center;
-      width: 150px;
+      width: 100px;
     }
     
     .qr-code {
       display: block;
-      margin: 0 auto 10px;
+      margin: 0 auto 5px;
+      border: 1px solid #e2e8f0;
+      padding: 3px;
+      background: white;
+      border-radius: 4px;
+    }
+    
+    .qr-item p {
+      margin: 0;
+      font-size: 0.85em;
+      line-height: 1.2;
     }
     
     .button {
-      background-color: #3498db;
+      background-color: #3182ce;
       color: white;
       border: none;
       padding: 10px 15px;
@@ -329,7 +429,7 @@ const generateGuideHTML = (brand: string, selectedCategory: string | undefined =
     }
     
     .button:hover {
-      background-color: #2980b9;
+      background-color: #2c5282;
     }
     
     .no-print {
@@ -339,31 +439,83 @@ const generateGuideHTML = (brand: string, selectedCategory: string | undefined =
     
     .footer {
       margin-top: 40px;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid #e2e8f0;
       padding-top: 15px;
       font-size: 0.9em;
-      color: #7f8c8d;
+      color: #718096;
+      text-align: center;
+    }
+    
+    .section-title {
+      background-color: #ebf8ff;
+      padding: 10px 15px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      margin: -20px -20px 15px -20px;
+      border-bottom: 1px solid #bee3f8;
+      font-weight: 600;
+      color: #2c5282;
+    }
+    
+    .platform-specific {
+      background-color: #f0fff4;
+      border: 1px solid #c6f6d5;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    
+    .platform-specific h4 {
+      color: #2f855a;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    
+    .platform-specific h5 {
+      color: #276749;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #c6f6d5;
+      padding-bottom: 5px;
+    }
+    
+    .url-text {
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #4a5568;
     }
   </style>
 </head>
 <body>
   <div class="header">
+    <img src="${logoDataUrl}" alt="${brandInfo.name} Logo" class="logo">
     <h1>Hearing Aid Troubleshooting Guide</h1>
   </div>
   
   <h2>${brandInfo.name}</h2>
   
   <div class="resources">
-    <h3>Quick Resources</h3>
-    <ul>
-      <li><strong>User Manual:</strong> <a href="${brandInfo.manualUrl}" target="_blank">View Online Manual</a></li>
-      <li><strong>Support Website:</strong> <a href="${brandInfo.troubleshootingUrl}" target="_blank">Visit Support Website</a></li>
-    </ul>
+    <h3>Quick Resources - Scan QR Codes for Help</h3>
+    <div class="qr-resources">
+      <div class="qr-item">
+        <img class="qr-code" src="${QRCodeGenerator.baseUrl}?size=${QRCodeGenerator.defaultSize}&data=${encodeURIComponent(brandInfo.pairingVideoUrl)}" alt="QR Code for Pairing Video">
+        <p><strong>Pairing</strong></p>
+      </div>
+      
+      <div class="qr-item">
+        <img class="qr-code" src="${QRCodeGenerator.baseUrl}?size=${QRCodeGenerator.defaultSize}&data=${encodeURIComponent(brandInfo.cleaningVideoUrl)}" alt="QR Code for Cleaning Video">
+        <p><strong>Cleaning</strong></p>
+      </div>
+      
+      <div class="qr-item">
+        <img class="qr-code" src="${QRCodeGenerator.baseUrl}?size=${QRCodeGenerator.defaultSize}&data=${encodeURIComponent(brandInfo.manualUrl)}" alt="QR Code for User Manual">
+        <p><strong>Manual</strong></p>
+      </div>
+    </div>
   </div>
 
   ${categories.map(category => `
   <div class="troubleshooting-section">
-    <h3>${category.title}</h3>
+    <div class="section-title">${category.title}</div>
     <ol>
       ${category.steps.map(step => `<li>${step}</li>`).join('')}
     </ol>
@@ -376,34 +528,17 @@ const generateGuideHTML = (brand: string, selectedCategory: string | undefined =
       <ol>
         ${category.platformSpecific.ios.steps.map(step => `<li>${step}</li>`).join('')}
       </ol>
-      <p>For detailed instructions: <a href="${category.platformSpecific.ios.url}" target="_blank">Apple Support</a></p>
+      <p>For detailed instructions: <span class="url-text">${category.platformSpecific.ios.url}</span></p>
       
       <h5>Android Devices</h5>
       <ol>
         ${category.platformSpecific.android.steps.map(step => `<li>${step}</li>`).join('')}
       </ol>
-      <p>For detailed instructions: <a href="${category.platformSpecific.android.url}" target="_blank">Android Support</a></p>
+      <p>For detailed instructions: <span class="url-text">${category.platformSpecific.android.url}</span></p>
     </div>
     ` : ''}
   </div>
   `).join('')}
-  
-  <div class="qr-section">
-    <div class="qr-item">
-      <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(brandInfo.pairingVideoUrl)}" alt="QR Code for Pairing Video">
-      <p>Bluetooth Pairing Video</p>
-    </div>
-    
-    <div class="qr-item">
-      <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(brandInfo.cleaningVideoUrl)}" alt="QR Code for Cleaning Video">
-      <p>Cleaning Instructions Video</p>
-    </div>
-    
-    <div class="qr-item">
-      <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(brandInfo.manualUrl)}" alt="QR Code for User Manual">
-      <p>User Manual</p>
-    </div>
-  </div>
   
   <div class="footer">
     <p>This guide is provided as a resource for basic troubleshooting. For persistent issues, please contact your hearing healthcare provider.</p>
@@ -425,6 +560,7 @@ const TroubleshootingGuidePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [htmlPreviewUrl, setHtmlPreviewUrl] = useState<string | null>(null);
 
   const handleBrandChange = (event: SelectChangeEvent<string>) => {
     setSelectedBrand(event.target.value);
@@ -434,33 +570,30 @@ const TroubleshootingGuidePage: React.FC = () => {
     setSelectedCategory(event.target.value);
   };
 
-  const handleGenerateGuide = () => {
+  const handleGenerateGuide = async () => {
     if (selectedBrand) {
-      // Generate and save the guide HTML
-      const html = generateGuideHTML(selectedBrand, selectedCategory || undefined);
       const brand = HEARING_AID_BRANDS.find(b => b.id === selectedBrand);
-      const filename = `${brand?.name.replace(/\s+/g, '_')}_troubleshooting_guide.html`;
+      const baseFilename = `${brand?.name.replace(/\s+/g, '_')}_troubleshooting_guide`;
       
-      // Create a Blob with the HTML content
+      // Generate HTML guide
+      const html = await generateGuideHTML(selectedBrand, selectedCategory || undefined);
       const blob = new Blob([html], { type: 'text/html' });
-      
-      // Create a URL for the Blob
       const url = URL.createObjectURL(blob);
       
-      // Create a temporary anchor element and trigger the download
+      // Store the URL for preview
+      setHtmlPreviewUrl(url);
+      
+      // Download the file
+      const htmlFilename = `${baseFilename}.html`;
       const a = document.createElement('a');
       a.href = url;
-      a.download = filename;
+      a.download = htmlFilename;
       document.body.appendChild(a);
       a.click();
-      
-      // Clean up
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
       
-      // Save a copy to the public directory for access via URL
-      // This is typically handled server-side, but we'll assume it's saved to the right location
-      const publicPath = `/audiometry_trainer/assets/guides/${filename}`;
+      // Automatically open in a new browser tab
+      window.open(url, '_blank');
       
       // Open the preview dialog
       setPreviewDialogOpen(true);
@@ -483,6 +616,15 @@ const TroubleshootingGuidePage: React.FC = () => {
 
   const findBrandById = (id: string) => HEARING_AID_BRANDS.find(brand => brand.id === id);
   const findCategoryById = (id: string) => TROUBLESHOOTING_CATEGORIES.find(cat => cat.id === id);
+
+  // Clean up URL object when the component unmounts or when no longer needed
+  React.useEffect(() => {
+    return () => {
+      if (htmlPreviewUrl) {
+        URL.revokeObjectURL(htmlPreviewUrl);
+      }
+    };
+  }, [htmlPreviewUrl]);
 
   return (
     <Container maxWidth="lg" sx={{ mb: 8, mt: 4 }}>
@@ -624,7 +766,7 @@ const TroubleshootingGuidePage: React.FC = () => {
               Guide Generated Successfully!
             </Typography>
             <Typography variant="body2" paragraph>
-              Your guide has been created and downloaded. You can also open it in a new tab to print.
+              Your guide has been created and opened in a new browser tab. You can print it directly from the browser.
             </Typography>
             
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
@@ -634,20 +776,16 @@ const TroubleshootingGuidePage: React.FC = () => {
               >
                 Create Another Guide
               </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Print />}
-                onClick={() => {
-                  const brand = findBrandById(selectedBrand);
-                  if (brand) {
-                    const filename = `${brand.name.replace(/\s+/g, '_')}_troubleshooting_guide.html`;
-                    window.open(`/audiometry_trainer/assets/guides/${filename}`, '_blank');
-                  }
-                }}
-              >
-                Open Guide for Printing
-              </Button>
+              {htmlPreviewUrl && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Print />}
+                  onClick={() => window.open(htmlPreviewUrl, '_blank')}
+                >
+                  Open Guide Again
+                </Button>
+              )}
             </Box>
           </Box>
         )}
@@ -760,12 +898,16 @@ const TroubleshootingGuidePage: React.FC = () => {
               </Typography>
               <List>
                 <ListItem>
-                  <ListItemIcon><Print /></ListItemIcon>
-                  <ListItemText primary="Print the guide directly from the new tab" />
+                  <ListItemIcon><SaveAlt /></ListItemIcon>
+                  <ListItemText primary="Your HTML file has been downloaded to your computer" />
                 </ListItem>
                 <ListItem>
-                  <ListItemIcon><SaveAlt /></ListItemIcon>
-                  <ListItemText primary="Save the HTML file to your computer" />
+                  <ListItemIcon><Assignment /></ListItemIcon>
+                  <ListItemText primary="The guide has been opened in a new browser tab" />
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon><Print /></ListItemIcon>
+                  <ListItemText primary="Use the browser's Print option (Ctrl+P or Cmd+P) to save as PDF or print the guide" />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon><QrCode2 /></ListItemIcon>
@@ -776,6 +918,14 @@ const TroubleshootingGuidePage: React.FC = () => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setPreviewDialogOpen(false)}>Close</Button>
+            {htmlPreviewUrl && (
+              <Button 
+                color="primary"
+                onClick={() => window.open(htmlPreviewUrl, '_blank')}
+              >
+                Open Again in Browser
+              </Button>
+            )}
             <Button 
               variant="contained"
               onClick={() => {

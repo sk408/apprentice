@@ -17,7 +17,7 @@ import OtoscopyPage from './pages/OtoscopyPage';
 import TroubleshootingGuidePage from './pages/TroubleshootingGuidePage';
 import RealEarMeasurementPage from './pages/RealEarMeasurementPage';
 import ContourTestPage from './pages/ContourTestPage';
-// import SettingsPage from './pages/SettingsPage';
+import ComprehensiveExam from './components/ComprehensiveExam';
 
 function App() {
   // Add state for the splash screen
@@ -50,7 +50,7 @@ function App() {
                 <Route path="/troubleshooting" element={<TroubleshootingGuidePage />} />
                 <Route path="/real-ear-measurement" element={<RealEarMeasurementPage />} />
                 <Route path="/contour-test" element={<ContourTestPage />} />
-                {/* <Route path="/settings" element={<SettingsPage />} /> */}
+                <Route path="/exam" element={<ComprehensiveExam />} />
               </Routes>
             </Layout>
           </Router>

@@ -13,6 +13,8 @@ The Audiometry Trainer is a comprehensive React-based application that simulates
 - Contour Test
 - Otoscopy examination
 - 3D Ear Anatomy exploration
+- Troubleshooting Guide
+- Follow-up Recommendations
 
 The application is designed to be educational, providing interactive simulations, tutorials, and feedback to help users learn and practice audiology techniques.
 
@@ -25,9 +27,12 @@ The application is designed to be educational, providing interactive simulations
 - **3D Ear Anatomy**: Interactive 3D model of ear anatomy for educational purposes
 - **Otoscopy Simulation**: Practice otoscopy examination techniques
 - **Contour Test**: Perform speech audiometry contour testing
+- **Troubleshooting Guide**: Comprehensive guide for diagnosing and resolving common audiology issues
+- **Follow-up Recommendations**: Generate appropriate follow-up recommendations based on test results
+- **Comprehensive Exam**: Test your knowledge with a comprehensive examination
 - **Educational Feedback**: Receive guidance and performance assessment after each test
 - **Keyboard Shortcuts**: Efficient testing with keyboard controls
-- **Progress Tracking**: Monitor improvement over time
+- **Dark/Light Mode**: Support for both dark and light themes
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 - **Accessibility Features**: High contrast mode and screen reader support
 
@@ -40,6 +45,7 @@ src/
 ├── assets/           # Images, sounds, and other static files
 ├── components/       # Reusable UI components (Audiogram, TestingInterface, etc.)
 ├── constants/        # Application-wide constants and configuration
+├── hooks/            # Custom React hooks
 ├── interfaces/       # TypeScript type definitions for the application
 ├── pages/            # Main application views (HomePage, TutorialPage, etc.)
 ├── services/         # Business logic and data handling (AudioService, TestingService, etc.)
@@ -51,10 +57,13 @@ src/
 
 - **TestingInterface**: Core component for audiometric testing, implements the Hughson-Westlake procedure
 - **Audiogram**: Visual representation of hearing thresholds across frequencies
-- **EarModel3D**: Three.js-based 3D model of ear anatomy
+- **EarAnatomyPage**: Three.js-based 3D model of ear anatomy
 - **RealEarMeasurementPage**: Simulation of real ear measurement procedures
 - **OtoscopyPage**: Interactive otoscopy simulation
 - **ContourTestPage**: Implementation of speech audiometry contour testing
+- **TroubleshootingGuidePage**: Comprehensive guide for audiology troubleshooting
+- **FollowUpPage**: Generate appropriate follow-up recommendations
+- **ComprehensiveExam**: Test knowledge with a comprehensive examination
 
 ### Core Services
 
@@ -74,7 +83,9 @@ src/
 - **React Three Fiber 9.1.0**: React renderer for Three.js to create 3D visualizations
 - **Chart.js 4.4.8**: Charting library used for the audiogram and data visualization
 - **React Router 7.2.0**: For handling navigation and routing within the application
+- **Recharts 2.15.1**: Flexible charting library for advanced visualizations
 - **Web Audio API**: Browser API used for generating calibrated audio tones
+- **Three.js 0.174.0**: JavaScript 3D library for creating the ear anatomy model
 
 ### Key Features Implementation
 
@@ -93,6 +104,9 @@ The application provides interactive visualizations including:
 - 3D ear anatomy model for educational purposes
 - Real-ear measurement charts
 - Otoscopy visualizations
+
+#### Theming and Accessibility
+The application supports both light and dark modes through a custom theme provider. Accessibility features include high contrast options and keyboard navigation.
 
 #### Data Storage
 The application uses browser local storage to save:
@@ -151,6 +165,12 @@ Explore the detailed 3D model of the ear to learn about its anatomical structure
 
 #### Contour Test
 Perform speech audiometry using the contour test method to assess patients' speech recognition thresholds.
+
+#### Troubleshooting Guide
+Access the comprehensive guide for diagnosing and resolving common audiology issues encountered in practice.
+
+#### Follow-up Recommendations
+Generate appropriate follow-up recommendations based on test results and patient profiles.
 
 ### Keyboard Shortcuts
 

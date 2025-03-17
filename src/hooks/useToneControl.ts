@@ -200,13 +200,65 @@ export default function useToneControl({
     patientThresholds
   ]);
 
-  // Handle patient response directly
+  // Handle patient response
   const handlePatientResponse = useCallback(() => {
-    if (currentStep && toneActive) {
-      setPatientResponse(true);
-      updateTrainerState(true);
+    console.log('👂 Patient response handler called.');
+    
+    if (!currentStep) {
+      console.log('⚠️ No current step available, cannot process patient response');
+      return;
     }
-  }, [currentStep, toneActive, setPatientResponse, updateTrainerState]);
+    
+    // If not in the middle of a tone presentation, this is a false positive
+    if (!toneActive) {
+      console.log('⚠️ False positive detected: Patient responded when no tone was presented');
+      testingService.recordFalsePositive();
+      
+      // Still show a quick visual confirmation to the user that their input was received
+      setPatientJustResponded(true);
+      setShowResponseIndicator(true);
+      
+      // Clear the visual indicator after a short time
+      setTimeout(() => {
+        setShowResponseIndicator(false);
+        setPatientJustResponded(false);
+      }, 500);
+      
+      return;
+    }
+    
+    // Process a valid response
+    const now = Date.now();
+
+    setPatientResponse(true);
+    setShowResponseIndicator(true);
+    setPatientJustResponded(true);
+  
+    // Record the response in TestingService
+    testingService.recordResponse(true);
+  
+    // Update UI for immediate feedback
+    console.log('🎯 User indicated POSITIVE response');
+  
+    // Record this response for threshold calculation
+    updateTrainerState(true);
+  
+    // Remember when we processed this presentation
+    lastProcessedPresentationRef.current = lastPresentationTimeRef.current;
+  
+    // Stop the tone
+    audioService.stopTone();
+    setToneActive(false);
+  }, [
+    currentStep, 
+    toneActive, 
+    setPatientResponse, 
+    setShowResponseIndicator,
+    setPatientJustResponded,
+    updateTrainerState,
+    lastProcessedPresentationRef,
+    lastPresentationTimeRef
+  ]);
 
   return {
     startTone,

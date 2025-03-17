@@ -26,6 +26,7 @@ import {
   HearingDisabled
 } from '@mui/icons-material';
 import TestSettings from '../components/TestSettings';
+import { OrganizationLinks } from '../constants/MediaAssets';
 
 const HomePage: React.FC = () => {
   const theme = useTheme();
@@ -399,10 +400,10 @@ const HomePage: React.FC = () => {
                 Resources
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Link href="https://www.asha.org" target="_blank" color="inherit" underline="hover">
+                <Link href={OrganizationLinks.asha} target="_blank" color="inherit" underline="hover">
                   ASHA
                 </Link>
-                <Link href="https://www.audiology.org" target="_blank" color="inherit" underline="hover">
+                <Link href={OrganizationLinks.aud} target="_blank" color="inherit" underline="hover">
                   AAA
                 </Link>
               </Box>

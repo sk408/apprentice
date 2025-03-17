@@ -46,14 +46,17 @@ import {
   LightMode
 } from '@mui/icons-material';
 
-// Placeholder for actual images - replace with real images when available
-const otoscopeImg = "/audiometry_trainer/assets/otoscope.jpg";
-const otoscopyTechniqueImg = "/audiometry_trainer/assets/otoscopy.webp";
-const normalTympanicMembraneImg = "/audiometry_trainer/assets/TM.jpg";
-const earCanalImg = "https://placeholder.com/ear-canal";
-const otitisMediaImg = "/audiometry_trainer/assets/OM.jpg";
-const cerumenImpactionImg = "/audiometry_trainer/assets/impacted.webp";
-const perforatedTMImg = "/audiometry_trainer/assets/perforation.webp";
+// Import centralized media assets
+import { OtoscopyImages, EquipmentImages } from '../constants/MediaAssets';
+
+// Use centralized image paths
+const otoscopeImg = EquipmentImages.otoscope;
+const otoscopyTechniqueImg = OtoscopyImages.technique;
+const normalTympanicMembraneImg = OtoscopyImages.normalTympanicMembrane;
+const earCanalImg = OtoscopyImages.earCanal;
+const otitisMediaImg = OtoscopyImages.otitisMedia;
+const cerumenImpactionImg = OtoscopyImages.cerumenImpaction;
+const perforatedTMImg = OtoscopyImages.perforatedTM;
 
 const OtoscopyPage: React.FC = () => {
   const theme = useTheme();
