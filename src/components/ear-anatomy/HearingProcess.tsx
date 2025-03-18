@@ -20,6 +20,7 @@ import {
 
 // Import from MediaAssets
 import { EarAnatomyImages } from '../../constants/MediaAssets';
+import MediaFullscreen from '../../components/MediaFullscreen';
 
 // Use image from MediaAssets
 const hearingProcessImg = EarAnatomyImages.hearingProcess;
@@ -35,18 +36,20 @@ const HearingProcess: React.FC = () => {
       </Typography>
       
       <Card sx={{ mb: 3 }}>
-        <CardMedia
-          component="img"
-          sx={{ 
-            height: { xs: 440, sm: 600, md: 700 },
-            maxWidth: '100%',
-            objectFit: 'contain', 
-            p: 2, 
-            bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
-          }}
-          image={hearingProcessImg}
-          alt="The Process of Hearing"
-        />
+        <MediaFullscreen>
+          <CardMedia
+            component="img"
+            sx={{ 
+              height: { xs: 440, sm: 600, md: 700 },
+              maxWidth: '100%',
+              objectFit: 'contain', 
+              p: 2, 
+              bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
+            }}
+            image={hearingProcessImg}
+            alt="The Process of Hearing"
+          />
+        </MediaFullscreen>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">
             The Journey of Sound:

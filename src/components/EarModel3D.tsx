@@ -8,6 +8,10 @@ import { getModelPath } from '../constants/MediaAssets';
 import * as THREE from 'three';
 import InfoIcon from '@mui/icons-material/Info';
 
+// NOTE: This 3D model component is intentionally excluded from the MediaFullscreen functionality
+// as requested by the user. The 3D model already has its own controls for manipulation and
+// works better as an interactive component without the fullscreen overlay.
+
 // Custom OrbitControls with reset functionality
 interface OrbitControlsWithResetProps {
   enablePan?: boolean;

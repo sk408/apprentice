@@ -48,6 +48,7 @@ import {
 
 // Import centralized media assets
 import { OtoscopyImages, EquipmentImages } from '../constants/MediaAssets';
+import MediaFullscreen from '../components/MediaFullscreen';
 
 // Use centralized image paths
 const otoscopeImg = EquipmentImages.otoscope;
@@ -93,19 +94,21 @@ const OtoscopyPage: React.FC = () => {
             A thorough otoscopic examination is essential for diagnosing common ear conditions such as otitis media,
             cerumen impaction, foreign bodies, tympanic membrane perforations, and other abnormalities.
           </Typography>
-          <Box 
-            component="img" 
-            src={otoscopeImg} 
-            alt="Otoscope device"
-            sx={{
-              width: '100%',
-              maxWidth: 400,
-              height: 'auto',
-              my: 2,
-              borderRadius: 1,
-              boxShadow: 2
-            }}
-          />
+          <MediaFullscreen>
+            <Box 
+              component="img" 
+              src={otoscopeImg} 
+              alt="Otoscope device"
+              sx={{
+                width: '100%',
+                maxWidth: 400,
+                height: 'auto',
+                my: 2,
+                borderRadius: 1,
+                boxShadow: 2
+              }}
+            />
+          </MediaFullscreen>
           <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
             Types of Otoscopes
           </Typography>
@@ -188,19 +191,20 @@ const OtoscopyPage: React.FC = () => {
             Performing Otoscopy: Step-by-Step Approach
           </Typography>
           
-          <Box 
-            component="img" 
-            src={otoscopyTechniqueImg} 
-            alt="Otoscopy technique"
-            sx={{
-              width: '100%',
-              maxWidth: 400,
-              height: 'auto',
-              my: 2,
-              borderRadius: 1,
-              boxShadow: 2
-            }}
-          />
+          <MediaFullscreen>
+            <Box 
+              component="img" 
+              src={otoscopyTechniqueImg} 
+              alt="Otoscopy technique"
+              sx={{
+                width: '100%',
+                maxWidth: 400,
+                height: 'auto',
+                my: 2,
+                borderRadius: 1,
+              }}
+            />
+          </MediaFullscreen>
           
           <List>
             <ListItem>
@@ -306,17 +310,19 @@ const OtoscopyPage: React.FC = () => {
           
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Box 
-                component="img" 
-                src={normalTympanicMembraneImg} 
-                alt="Normal tympanic membrane"
-                sx={{
-                  width: '100%',
-                  height: 'auto',
-                  borderRadius: 1,
-                  boxShadow: 2
-                }}
-              />
+              <MediaFullscreen>
+                <Box 
+                  component="img" 
+                  src={normalTympanicMembraneImg} 
+                  alt="Normal tympanic membrane"
+                  sx={{
+                    width: '100%',
+                    height: 'auto',
+                    borderRadius: 1,
+                    boxShadow: 2
+                  }}
+                />
+              </MediaFullscreen>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="h6">External Auditory Canal</Typography>
@@ -391,17 +397,19 @@ const OtoscopyPage: React.FC = () => {
             <AccordionDetails>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={5}>
-                  <Box 
-                    component="img" 
-                    src={cerumenImpactionImg} 
-                    alt="Cerumen impaction"
-                    sx={{
-                      width: '100%',
-                      height: 'auto',
-                      borderRadius: 1,
-                      boxShadow: 2
-                    }}
-                  />
+                  <MediaFullscreen>
+                    <Box 
+                      component="img" 
+                      src={cerumenImpactionImg} 
+                      alt="Cerumen impaction"
+                      sx={{
+                        width: '100%',
+                        height: 'auto',
+                        borderRadius: 1,
+                        boxShadow: 2
+                      }}
+                    />
+                  </MediaFullscreen>
                 </Grid>
                 <Grid item xs={12} md={7}>
                   <Typography paragraph>
@@ -425,17 +433,19 @@ const OtoscopyPage: React.FC = () => {
             <AccordionDetails>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={5}>
-                  <Box 
-                    component="img" 
-                    src={otitisMediaImg} 
-                    alt="Acute otitis media"
-                    sx={{
-                      width: '100%',
-                      height: 'auto',
-                      borderRadius: 1,
-                      boxShadow: 2
-                    }}
-                  />
+                  <MediaFullscreen>
+                    <Box 
+                      component="img" 
+                      src={otitisMediaImg} 
+                      alt="Acute otitis media"
+                      sx={{
+                        width: '100%',
+                        height: 'auto',
+                        borderRadius: 1,
+                        boxShadow: 2
+                      }}
+                    />
+                  </MediaFullscreen>
                 </Grid>
                 <Grid item xs={12} md={7}>
                   <Typography paragraph>
@@ -476,17 +486,19 @@ const OtoscopyPage: React.FC = () => {
             <AccordionDetails>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={5}>
-                  <Box 
-                    component="img" 
-                    src={perforatedTMImg} 
-                    alt="Perforated tympanic membrane"
-                    sx={{
-                      width: '100%',
-                      height: 'auto',
-                      borderRadius: 1,
-                      boxShadow: 2
-                    }}
-                  />
+                  <MediaFullscreen>
+                    <Box 
+                      component="img" 
+                      src={perforatedTMImg} 
+                      alt="Perforated tympanic membrane"
+                      sx={{
+                        width: '100%',
+                        height: 'auto',
+                        borderRadius: 1,
+                        boxShadow: 2
+                      }}
+                    />
+                  </MediaFullscreen>
                 </Grid>
                 <Grid item xs={12} md={7}>
                   <Typography paragraph>

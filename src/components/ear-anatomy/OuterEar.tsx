@@ -20,6 +20,7 @@ import {
 
 // Import from MediaAssets
 import { EarAnatomyImages } from '../../constants/MediaAssets';
+import MediaFullscreen from '../../components/MediaFullscreen';
 
 // Use image from MediaAssets
 const outerEarImg = EarAnatomyImages.outerEar;
@@ -34,18 +35,20 @@ const OuterEar: React.FC = () => {
         as well as the ear canal (external auditory canal) that leads to the eardrum.
       </Typography>
       <Card sx={{ mb: 2 }}>
-        <CardMedia
-          component="img"
-          image={outerEarImg}
-          alt="Outer Ear Anatomy"
-          sx={{ 
-            height: { xs: 400, sm: 500, md: 600 },
-            maxWidth: '100%',
-            objectFit: 'contain', 
-            p: 2, 
-            bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
-          }}
-        />
+        <MediaFullscreen>
+          <CardMedia
+            component="img"
+            image={outerEarImg}
+            alt="Outer Ear Anatomy"
+            sx={{ 
+              height: { xs: 400, sm: 500, md: 600 },
+              maxWidth: '100%',
+              objectFit: 'contain', 
+              p: 2, 
+              bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
+            }}
+          />
+        </MediaFullscreen>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">
             Components of the Outer Ear:

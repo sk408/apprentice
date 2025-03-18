@@ -24,6 +24,7 @@ import {
 
 // Import from MediaAssets
 import { EarAnatomyImages } from '../../constants/MediaAssets';
+import MediaFullscreen from '../../components/MediaFullscreen';
 
 // Use image from MediaAssets
 const middleEarImg = EarAnatomyImages.middleEar;
@@ -49,18 +50,20 @@ const MiddleEar: React.FC = () => {
       </Typography>
       
       <Card sx={{ mb: 3 }}>
-        <CardMedia
-          component="img"
-          sx={{ 
-            height: { xs: 400, sm: 500, md: 600 },
-            maxWidth: '100%',
-            objectFit: 'contain', 
-            p: 2, 
-            bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
-          }}
-          image={middleEarImg}
-          alt="Middle Ear Anatomy"
-        />
+        <MediaFullscreen>
+          <CardMedia
+            component="img"
+            sx={{ 
+              height: { xs: 400, sm: 500, md: 600 },
+              maxWidth: '100%',
+              objectFit: 'contain', 
+              p: 2, 
+              bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
+            }}
+            image={middleEarImg}
+            alt="Middle Ear Anatomy"
+          />
+        </MediaFullscreen>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">
             Key Structures of the Middle Ear:

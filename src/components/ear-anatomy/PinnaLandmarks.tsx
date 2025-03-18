@@ -16,6 +16,7 @@ import {
 import {
   KeyboardArrowDown
 } from '@mui/icons-material';
+import MediaFullscreen from '../../components/MediaFullscreen';
 
 // Import from MediaAssets
 import { EarAnatomyImages } from '../../constants/MediaAssets';
@@ -45,18 +46,20 @@ const PinnaLandmarks: React.FC = () => {
       </Typography>
       
       <Card sx={{ mb: 2 }}>
-        <CardMedia
-          component="img"
-          sx={{ 
-            height: { xs: 440, sm: 600, md: 700 },
-            maxWidth: '100%',
-            objectFit: 'contain', 
-            p: 2, 
-            bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
-          }}
-          image={outerEarImg}
-          alt="Pinna Landmarks"
-        />
+        <MediaFullscreen>
+          <CardMedia
+            component="img"
+            sx={{ 
+              height: { xs: 440, sm: 600, md: 700 },
+              maxWidth: '100%',
+              objectFit: 'contain', 
+              p: 2, 
+              bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : '#f5f5f5' 
+            }}
+            image={outerEarImg}
+            alt="Pinna Landmarks"
+          />
+        </MediaFullscreen>
         <CardContent>
           <Typography variant="subtitle1" gutterBottom fontWeight="bold">
             Key Landmarks of the Pinna:
