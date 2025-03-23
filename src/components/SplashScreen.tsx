@@ -21,11 +21,14 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ show }) => {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: darkMode ? '#121212' : '#ffffff',
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'transparent',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 9999,
+        overflow: 'hidden',
       }}
     >
       <Box
@@ -33,9 +36,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ show }) => {
         src={logo}
         alt="Audiometry Trainer Logo"
         sx={{
-          width: '80%',
-          height: '80%',
-          objectFit: 'contain',
+          width: '95%',
+          height: '95%',
+          objectFit: 'cover',
         }}
       />
     </Box>
