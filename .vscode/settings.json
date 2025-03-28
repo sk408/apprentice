@@ -1,0 +1,5 @@
+{
+    "github.copilot.chat.followUps": "always",
+    "github.copilot.chat.codesearch.enabled": true,
+    "github.copilot.chat.agent.thinkingTool": true
+}
