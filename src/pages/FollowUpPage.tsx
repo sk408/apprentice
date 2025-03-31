@@ -479,27 +479,31 @@ const FollowUpPage: React.FC = () => {
                 <Box component="tbody">
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Can't hear soft sounds"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase soft gain (50dB); check MPO is appropriate</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase soft gain (50dB); check MPO is appropriate; verify audibility of soft speech</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Everything is too quiet"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase medium gain (65dB) across relevant frequencies</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase medium gain (65dB) across relevant frequencies; consider overall gain increase</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"My own voice is too loud"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Decrease medium and loud gain in low frequencies; check for occlusion</Box>
+                    <Box component="td" sx={{ p: 1 }}>"My own voice is too loud/boomy"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Decrease medium and loud gain in low frequencies (250-750Hz); check for occlusion effect (venting, dome size); counsel on adaptation</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Loud sounds are uncomfortable"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Decrease loud gain (80dB); check compression ratios and MPO settings</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Loud sounds are uncomfortable/too sharp"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Decrease loud gain (80dB); check/lower MPO settings; adjust compression ratios (increase CR for loudness control)</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"I hear background noise too much"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Decrease soft gain; ensure appropriate noise reduction settings</Box>
+                    <Box component="td" sx={{ p: 1 }}>Decrease soft gain (especially low frequencies); ensure appropriate noise reduction settings are active/aggressive; check directional microphone function</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"People sound muffled"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase medium gain in high frequencies (2-4kHz)</Box>
+                    <Box component="td" sx={{ p: 1 }}>"People sound muffled/unclear"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase medium gain in high frequencies (2-4kHz); verify high-frequency audibility with REM</Box>
+                  </Box>
+                  <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Box component="td" sx={{ p: 1 }}>"Hearing aid whistles (feedback)"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Check insertion/fit; check for earwax; run feedback calibration; reduce gain in specific frequency region causing feedback (often 2-4kHz)</Box>
                   </Box>
                 </Box>
               </Box>
@@ -554,107 +558,107 @@ const FollowUpPage: React.FC = () => {
                 <Box component="tbody">
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"My voice sounds hollow/boomy"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 250-500Hz; check for occlusion effect</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce 250-500Hz gain (primarily loud/medium); check for occlusion effect (improve venting, change dome style/size)</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Can't understand speech in noise"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 1000-4000Hz; ensure directional mics are active</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 1000-4000Hz gain; ensure directional mics are active & appropriate program selected; check noise reduction settings; counsel on realistic expectations & communication strategies</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Can't hear women/children's voices"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 2000-6000Hz</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 2000-6000Hz gain (medium/soft inputs); verify audibility for high-frequency speech sounds</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Sounds are too sharp/harsh"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 3000-6000Hz; check MPO settings</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Sounds are too sharp/harsh/metallic"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce 3000-6000Hz gain (especially loud inputs); check MPO settings; smooth frequency response; consider slower compression attack/release times</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Everything sounds tinny"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 250-1000Hz for more fullness</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Everything sounds tinny/lacks fullness"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 250-1000Hz gain (soft/medium inputs) for more warmth; check low-frequency vent effects</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Running water/paper sounds too loud"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 4000-8000Hz; adjust compression for high frequencies</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Running water/paper sounds too loud/annoying"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce 4000-8000Hz gain (soft inputs); adjust compression for high frequencies (increase threshold/ratio); counsel on adaptation to environmental sounds</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Hearing aid whistles"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Check feedback management; may need to reduce gain around 2000-4000Hz</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Hearing aid whistles (feedback)"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Check fit/insertion; remove earwax; run feedback calibration; may need to reduce gain around 2000-4000Hz if calibration fails; consider custom earmold</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Can't hear 's' sounds"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 4000-6000Hz; check audibility for sibilants</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Can't hear 's' or 'sh' sounds"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 4000-6000Hz gain (soft/medium inputs); check audibility for sibilants using REM; consider frequency lowering technology if needed</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"My own voice echoes"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 500-1000Hz; check venting; consider occlusion management</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce 500-1000Hz gain; check venting; consider occlusion management features; may relate to digital processing delay - check with manufacturer</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"TV sounds muffled"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 1000-3000Hz; consider TV program with mild treble boost</Box>
+                    <Box component="td" sx={{ p: 1 }}>"TV sounds muffled or unclear"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 1000-4000Hz gain; consider dedicated TV program with mild treble boost or TV streaming accessory</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Music sounds distorted"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase MPO; create dedicated music program with higher compression threshold; adjust 1000-4000Hz</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Music sounds distorted or lacks richness"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Create dedicated music program: increase MPO, use lower compression ratios (more linear), wider frequency response, disable noise reduction/feedback management if possible</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Wind noise is overwhelming"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 250-500Hz; enable wind noise reduction; consider dedicated outdoor program</Box>
+                    <Box component="td" sx={{ p: 1 }}>Enable/increase wind noise reduction feature; reduce low-frequency gain (250-500Hz); consider microphone covers or dedicated outdoor program</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Voices sound robotic"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Check/adjust compression settings; smooth frequency response between 1000-4000Hz</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Voices sound robotic or artificial"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Check/adjust compression settings (try slower attack/release times); smooth frequency response between 1000-4000Hz; ensure adequate gain without over-amplification</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Traffic/engine noise too loud"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 250-1000Hz; ensure noise reduction is active; consider car program</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce low-frequency gain (250-1000Hz); ensure noise reduction is active; consider dedicated car program with stronger noise reduction/directional focus</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Phone conversations unclear"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 1000-3000Hz; create dedicated phone program; consider telecoil if available</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 1000-3000Hz gain; create dedicated phone program (acoustic or telecoil); consider Bluetooth streaming for direct audio input</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Can't hear in meetings/groups"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 1500-4000Hz; adjust directional microphones; consider remote microphone accessory</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 1500-4000Hz gain; ensure adaptive directional microphones are functioning; optimize noise reduction; counsel on positioning; consider remote microphone accessory</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"Birds/nature sounds too shrill"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 4000-8000Hz; adjust compression for high frequencies; check MPO</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce 4000-8000Hz gain (soft inputs); adjust compression/MPO for high frequencies; counsel on adaptation</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Chewing sounds too loud"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 500-1500Hz; adjust gain for soft/medium inputs; check for occlusion</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Chewing or crunching sounds too loud"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce gain for soft/medium inputs around 500-1500Hz; check for occlusion effect; counsel on adaptation</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Box component="td" sx={{ p: 1 }}>"People sound like they're mumbling"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase 2000-4000Hz; ensure consistent gain across speech frequencies</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase 2000-4000Hz gain (medium inputs); ensure consistent gain across speech frequencies; verify high-frequency audibility</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Restaurants are impossible"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Create restaurant program with directional mics; enhance 1000-4000Hz; reduce low frequencies</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Restaurants are impossible to hear in"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Create dedicated restaurant program: strong directional focus, aggressive noise reduction, enhance 1000-4000Hz, reduce low frequencies; counsel on strategies (seating, timing)</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Can't hear TV at normal volume"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Increase gain at 1000-4000Hz; consider TV streaming accessory if available</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Can't hear TV at the volume others prefer"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Increase gain at 1000-4000Hz (medium inputs); verify overall loudness perception; consider TV streaming accessory for direct audio input</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Feel like I'm in a barrel"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce 250-750Hz; check venting; possible occlusion effect</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Feel plugged up / like I'm in a barrel"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Classic occlusion effect: Increase vent size or change to open dome if appropriate; reduce low-frequency gain (250-750Hz)</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Can't hear doorbell/alerts"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Check audibility at specific doorbell frequencies (usually 500-1500Hz); consider alerting accessories</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Can't hear doorbell/phone ring/alerts"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Check audibility at specific alert frequencies (often 500-2000Hz); increase gain in relevant bands if needed; counsel on visual/vibrating alerts or assistive listening devices</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Car indicators too loud"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Reduce specific frequency band (typically around 1000Hz) or create car program</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Car turn signals/indicators too loud/annoying"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Reduce gain in specific frequency band of the signal (typically 1000-2000Hz); potentially create car program with specific adjustments</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Background noise drowns out conversation"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Enhance 1000-4000Hz; reduce low frequencies; ensure directional microphones and noise reduction active</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Background noise seems to drown out conversation"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Ensure directional microphones and noise reduction are active and optimized; enhance speech frequencies (1000-4000Hz); potentially reduce low-frequency gain</Box>
                   </Box>
                   <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Box component="td" sx={{ p: 1 }}>"Sounds are delayed/echo"</Box>
-                    <Box component="td" sx={{ p: 1 }}>Check for digital delay issues; ensure appropriate processing speed; may need manufacturer adjustment</Box>
+                    <Box component="td" sx={{ p: 1 }}>"Sounds seem delayed or have an echo (not own voice)"</Box>
+                    <Box component="td" sx={{ p: 1 }}>Check for digital processing delay issues, especially if user has good low-frequency hearing (mixing amplified & natural sound); may require manufacturer-specific settings or counseling</Box>
                   </Box>
                 </Box>
               </Box>

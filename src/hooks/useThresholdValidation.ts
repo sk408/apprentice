@@ -96,107 +96,42 @@ export default function useThresholdValidation({
       return;
     }
     
-    // Validate the threshold first
-    const validation = validateThreshold();
-    if (!validation.isValid) {
-      setErrorMessage(validation.message);
-      return;
-    }
+    // Store the current level as the threshold
+    const thresholdLevel = currentStep.currentLevel;
     
-    // Find the valid threshold level from our response counts
-    let validThresholdLevel: number | null = null;
-    let minValidLevel = Infinity;
+    console.log(`Storing threshold at current level: ${thresholdLevel}dB`);
     
-    // Check the response counts for the current frequency and ear
-    const frequencyData = responseCounts[currentStep.frequency];
-    const earData = frequencyData?.[currentStep.ear] || {};
-    
-    Object.entries(earData).forEach(([levelStr, counts]) => {
-      const level = parseInt(levelStr);
-      if (counts.total >= 2 && counts.heard >= 2 && level < minValidLevel) {
-        validThresholdLevel = level;
-        minValidLevel = level;
-      }
-    });
-    
-    if (validThresholdLevel === null) {
-      setErrorMessage('Could not determine a valid threshold level.');
-      return;
-    }
-    
-    console.log(`Storing threshold at validated level: ${validThresholdLevel}dB (current level is ${currentStep.currentLevel}dB)`);
-    
-    // Update the TestingService with the validated threshold level
-    testingService.setCurrentLevel(validThresholdLevel as HearingLevel);
-    
-    // IMPORTANT: Explicitly update the step's responseStatus in TestingService
+    // IMPORTANT: First update TestingService state
     // This ensures the threshold is counted correctly in progress calculation
+    testingService.setCurrentLevel(thresholdLevel as HearingLevel);
     testingService.completeCurrentStep('threshold');
     
-    // Mark the current step as completed without advancing to next step
-    if (session) {
-      const updatedSession = { ...session };
-      
-      // Find the specific test step for the current frequency and ear
-      // FIXED: Don't require ID match which breaks when changing frequencies
-      // Instead, just rely on matching frequency, ear and testType
-      const stepIndex = updatedSession.testSequence.findIndex(
-        step => step.frequency === currentStep.frequency && 
-               step.ear === currentStep.ear &&
-               step.testType === currentStep.testType
-      );
-      
-      if (stepIndex === -1) {
-        console.error('Could not find matching test step in session for frequency:', currentStep.frequency, 'ear:', currentStep.ear);
-        setErrorMessage('Failed to store threshold: test step not found.');
-        return;
-      }
-      
-      const updatedStep = updatedSession.testSequence[stepIndex];
-      
-      // CRITICAL FIX: Make sure we explicitly set the responseStatus property
-      // Mark the step as completed and set responseStatus to 'threshold'
-      updatedStep.completed = true;
-      updatedStep.responseStatus = 'threshold';
-      
-      // Also update the currentLevel to the validated threshold level
-      updatedStep.currentLevel = validThresholdLevel as HearingLevel;
-      
-      // Add a debug log to check what we're storing
-      console.log(`DEBUG: Storing threshold for step ${stepIndex}:`, {
-        id: updatedStep.id,
-        frequency: updatedStep.frequency,
-        ear: updatedStep.ear,
-        currentLevel: updatedStep.currentLevel,
-        responseStatus: updatedStep.responseStatus
-      });
-      
-      // Update our session state to reflect this change
-      setSession(updatedSession);
-      
-      // Also update the currentStep to show it's completed with proper type validation
-      if (currentStep) {
-        const updatedCurrentStep: TestStep = {
-          ...currentStep,
-          completed: true,
-          // Explicitly set the responseStatus with the correct type
-          responseStatus: 'threshold',
-          // Also update the currentLevel in the current step
-          currentLevel: validThresholdLevel as HearingLevel
-        };
-        
-        setCurrentStep(updatedCurrentStep);
-      }
-      
-      console.log(`Threshold stored at ${validThresholdLevel}dB, marked as completed but staying on current frequency`);
+    // Get the updated session from TestingService to ensure sync
+    const updatedServiceSession = testingService.getCurrentSession();
+    if (!updatedServiceSession) {
+      console.error('Failed to get updated session from TestingService');
+      setErrorMessage('Failed to store threshold: session not found.');
+      return;
     }
+    
+    // Update React state with the TestingService state
+    setSession(updatedServiceSession);
+    
+    // Update the current step in React state
+    const updatedCurrentStep: TestStep = {
+      ...currentStep,
+      completed: true,
+      responseStatus: 'threshold',
+      currentLevel: thresholdLevel as HearingLevel
+    };
+    setCurrentStep(updatedCurrentStep);
     
     // Force update of test progress since we've completed a step
     const progress = testingService.calculateProgress();
     console.log(`Updated progress after storing threshold: ${progress}%`);
     
     // Add clearer feedback for successful threshold storage and navigation instructions
-    setCurrentGuidance(`Threshold successfully stored at ${validThresholdLevel} dB! You can now use the up arrow (or press Up) to move to the next frequency, or the down arrow to go to a previous frequency.`);
+    setCurrentGuidance(`Threshold manually stored at ${thresholdLevel} dB! You can now use the up arrow (or press Up) to move to the next frequency, or the down arrow to go to a previous frequency.`);
     
     // Update UI to indicate threshold recorded
     setProcedurePhase('complete');
@@ -205,9 +140,7 @@ export default function useThresholdValidation({
     // Update the response counts map with the stored threshold
     setResponseCounts((prev: ResponseCounts) => {
       const newCounts = { ...prev };
-      // At this point validThresholdLevel is guaranteed to be non-null since we checked above
-      // Use type assertion to ensure TypeScript understands this
-      const level = validThresholdLevel as HearingLevel;
+      const level = thresholdLevel as HearingLevel;
       const frequency = currentStep.frequency;
       const ear = currentStep.ear;
       
@@ -222,17 +155,14 @@ export default function useThresholdValidation({
       }
       
       newCounts[frequency][ear][level] = {
-        total: 3,  // Standard Hughson-Westlake criteria
-        heard: 2   // At least 2 out of 3
+        total: 1,  // Manual threshold storage
+        heard: 1   // Single response
       };
       
       return newCounts;
     });
   }, [
     currentStep, 
-    session, 
-    responseCounts, 
-    validateThreshold, 
     setErrorMessage, 
     setSession, 
     setCurrentStep, 

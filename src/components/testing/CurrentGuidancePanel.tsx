@@ -33,25 +33,16 @@ const CurrentGuidancePanel: React.FC<CurrentGuidancePanelProps> = ({
 }) => {
   const handleSuggestedAction = (action: string) => {
     if (action === 'present') {
-      // For 'present' action, we don't call onSuggestedAction here
-      // This is now handled by separate mouse events
-      return;
+      if (startTone && stopTone) {
+        startTone();
+        // Use setTimeout to simulate a short tone press
+        setTimeout(() => {
+          stopTone();
+          // onSuggestedAction();
+        }, 1000); // 1 second tone duration
+      }
     } else {
       // For all other actions, execute the action
-      onSuggestedAction();
-    }
-  };
-
-  const handleMouseDown = () => {
-    if (suggestedAction === 'present' && startTone) {
-      startTone();
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (suggestedAction === 'present' && stopTone) {
-      stopTone();
-      // Call onSuggestedAction after the tone is stopped
       onSuggestedAction();
     }
   };
@@ -103,7 +94,7 @@ const CurrentGuidancePanel: React.FC<CurrentGuidancePanelProps> = ({
       
       {/* Action Buttons */}
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-        {canStoreThreshold && (
+        {onStoreThreshold && (
           <Button 
             variant="outlined" 
             color="primary" 
@@ -119,11 +110,6 @@ const CurrentGuidancePanel: React.FC<CurrentGuidancePanelProps> = ({
             variant="contained" 
             color="primary" 
             onClick={() => handleSuggestedAction(suggestedAction)}
-            onMouseDown={suggestedAction === 'present' ? handleMouseDown : undefined}
-            onMouseUp={suggestedAction === 'present' ? handleMouseUp : undefined}
-            onMouseLeave={suggestedAction === 'present' ? handleMouseUp : undefined}
-            onTouchStart={suggestedAction === 'present' ? handleMouseDown : undefined}
-            onTouchEnd={suggestedAction === 'present' ? handleMouseUp : undefined}
             size="small"
           >
             {getSuggestedActionLabel(suggestedAction)}

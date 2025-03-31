@@ -350,14 +350,27 @@ const TestResults: React.FC<TestResultsProps> = ({ session, onNewTest }) => {
           </TabPanel>
           
           <TabPanel value={tabValue} index={1}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <Audiogram 
-                thresholds={results.userThresholds} 
-                compareThresholds={patient?.thresholds} 
-                height={500}
-                width={800}
-                title="Test Results vs. Actual Thresholds"
-              />
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center',
+              width: '100%',
+              minHeight: '600px'  // Ensure minimum height for the container
+            }}>
+              <Box sx={{ 
+                width: '100%',
+                maxWidth: '1000px',  // Maximum width to prevent stretching too wide
+                height: 'auto',
+                minHeight: '500px',  // Minimum height for the audiogram
+                aspectRatio: '4/3',  // Maintain a good aspect ratio
+                mb: 3  // Add margin bottom
+              }}>
+                <Audiogram 
+                  thresholds={results.userThresholds} 
+                  compareThresholds={patient?.thresholds} 
+                  title="Test Results vs. Actual Thresholds"
+                />
+              </Box>
               
               <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2 }}>
                 Solid lines: Your test results | Dashed lines: Actual patient thresholds

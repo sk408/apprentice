@@ -9,7 +9,10 @@ import {
   Tooltip,
   Legend,
   ChartData,
-  LogarithmicScale
+  LogarithmicScale,
+  ChartOptions,
+  ScaleOptionsByType,
+  CartesianScaleTypeRegistry
 } from 'chart.js';
 import { Scatter } from 'react-chartjs-2';
 import { ThresholdPoint } from '../interfaces/AudioTypes';
@@ -103,8 +106,40 @@ const Audiogram: React.FC<AudiogramProps> = ({
   interactive = false
 }) => {
   const chartRef = useRef<ChartJS<'scatter'>>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 0 });
   const [reticleFlash, setReticleFlash] = useState(false);
   
+  // Update dimensions when container size changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const updateDimensions = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      
+      const { width: containerWidth, height: containerHeight } = container.getBoundingClientRect();
+      setChartDimensions({
+        width: containerWidth,
+        height: containerHeight
+      });
+    };
+    
+    // Initial update
+    updateDimensions();
+    
+    // Add resize observer
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    resizeObserver.observe(containerRef.current);
+    
+    return () => {
+      if (containerRef.current) {
+        resizeObserver.unobserve(containerRef.current);
+      }
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   // Cleanup chart instance when component unmounts
   useEffect(() => {
     return () => {
@@ -371,7 +406,7 @@ const Audiogram: React.FC<AudiogramProps> = ({
   };
 
   // Chart options
-  const options = {
+  const options: ChartOptions<'scatter'> = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -383,7 +418,8 @@ const Audiogram: React.FC<AudiogramProps> = ({
           text: 'Frequency (Hz)'
         },
         ticks: {
-          callback: (value: any) => {
+          callback: function(this: any, tickValue: number | string, index: number) {
+            const value = Number(tickValue);
             // Only show labels for major frequencies to avoid crowding on mobile
             if (MAJOR_FREQUENCIES.includes(value)) {
               return value.toString();
@@ -407,6 +443,7 @@ const Audiogram: React.FC<AudiogramProps> = ({
         }
       },
       y: {
+        type: 'linear' as const,
         reverse: true, // Invert y-axis (negative values at top)
         title: {
           display: true,
@@ -415,15 +452,23 @@ const Audiogram: React.FC<AudiogramProps> = ({
         min: -10,
         max: 120,
         ticks: {
-          stepSize: 10
+          stepSize: 10,
+          padding: 8,
+          autoSkip: false,  // Prevent automatic tick skipping
+          callback: function(this: any, tickValue: number | string, index: number) {
+            const value = Number(tickValue);
+            return value + ' dB';  // Add dB label to each tick
+          }
         },
         grid: {
           color: (context: any) => {
-            // Highlight key lines at 0 dB HL and other significant levels
+            // Show all grid lines with varying intensity
             if (context.tick.value === 0) return 'rgba(0, 0, 0, 0.5)';
-            if (context.tick.value % 20 === 0) return 'rgba(0, 0, 0, 0.2)';
+            if (context.tick.value % 10 === 0) return 'rgba(0, 0, 0, 0.2)';
             return 'rgba(0, 0, 0, 0.1)';
-          }
+          },
+          drawTicks: true,
+          tickLength: 10
         }
       }
     },
@@ -490,17 +535,42 @@ const Audiogram: React.FC<AudiogramProps> = ({
   };
 
   return (
-    <Box sx={{ 
-      flexGrow: 1, 
-      position: 'relative',
-      height: '100%',
-      width: '100%',
-      cursor: interactive && !toneActive ? 'crosshair' : 'default'
-    }}>
-      <Scatter 
-        data={prepareChartData()} 
-        options={options} 
+    <Box 
+      ref={containerRef}
+      sx={{ 
+        width: width,
+        height: height,
+        position: 'relative',
+        '& canvas': {
+          width: '100% !important',
+          height: '100% !important'
+        }
+      }}
+    >
+      {title && (
+        <Typography 
+          variant="h6" 
+          align="center" 
+          sx={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            py: 1
+          }}
+        >
+          {title}
+        </Typography>
+      )}
+      
+      <Scatter
         ref={chartRef}
+        data={prepareChartData()}
+        options={{
+          ...options,
+          maintainAspectRatio: false,
+          responsive: true
+        }}
         onClick={handleChartClick}
       />
     </Box>

@@ -382,13 +382,14 @@ class TestingService {
       console.log(`Step completed status: ${currentStep.completed}, responseStatus: ${currentStep.responseStatus || 'not set'}`);
     }
     
-    // Simply change the currentStep index without modifying the step itself
-    // This preserves any completed/threshold status that was set
+    // Increment the step counter
     this.currentSession.currentStep += 1;
     
-    // Check if the test is complete
+    // Check if we've reached the end of the sequence
     if (this.currentSession.currentStep >= this.currentSession.testSequence.length) {
-      this.completeSession();
+      // Reset the step counter to the last valid step instead of completing the session
+      this.currentSession.currentStep = this.currentSession.testSequence.length - 1;
+      console.log('Reached end of test sequence. Staying on last step.');
     }
   }
 
@@ -407,10 +408,7 @@ class TestingService {
     
     const step = this.getCurrentStep();
     if (step) {
-      // IMPORTANT: We need to preserve the completed status and responseStatus
-      // when navigating between frequencies
       if (markCompleted) {
-        // Only mark as completed if explicitly requested
         console.log(`Marking step as completed with threshold at: ${step.currentLevel}dB`);
         step.completed = true;
         
@@ -420,18 +418,32 @@ class TestingService {
         }
       } else {
         console.log(`Skipping to next step without marking current step as completed`);
-        // FIXED: Do not modify the completed or responseStatus properties if they're already set
-        // This preserves thresholds when navigating between frequencies
       }
       
       const beforeStep = this.currentSession.currentStep;
-      this.moveToNextStep();
+      
+      // Check if this is the last step
+      const isLastStep = beforeStep === this.currentSession.testSequence.length - 1;
+      
+      if (!isLastStep) {
+        this.moveToNextStep();
+      } else {
+        console.log('Already at last step, not moving forward');
+      }
+      
       const afterStep = this.currentSession.currentStep;
       console.log(`=== Debug: skipCurrentStep - moved from step ${beforeStep} to ${afterStep}`);
       
-      // Debug - check if the session sequence length matches
-      console.log(`=== Debug: session has ${this.currentSession.testSequence.length} total steps`);
-      console.log(`=== Debug: returning new step with frequency ${this.getCurrentStep()?.frequency || 'null'}`);
+      // If we're on the last step and it's completed, check if the entire test is complete
+      if (isLastStep && step.completed) {
+        const allStepsComplete = this.currentSession.testSequence.every(s => 
+          s.completed && (s.responseStatus === 'threshold' || s.responseStatus === 'no_response')
+        );
+        
+        if (allStepsComplete) {
+          console.log('All steps are complete. Test can be finished.');
+        }
+      }
     } else {
       console.log("=== Debug: skipCurrentStep - no current step found");
     }
@@ -481,49 +493,72 @@ class TestingService {
   private calculateResults(session: TestSession, actualThresholds: ThresholdPoint[] = []): TestResult {
     const userThresholds = this.extractThresholds(session);
     
-    // Calculate accuracy by comparing user thresholds with actual thresholds
+    // Calculate accuracy only for frequencies that were actually tested
     let accuracySum = 0;
     let comparedCount = 0;
     
     userThresholds.forEach(userT => {
-      const matchingActual = actualThresholds.find(
-        actT => 
-          actT.frequency === userT.frequency && 
-          actT.ear === userT.ear && 
-          actT.testType === userT.testType && 
-          actT.responseStatus === 'threshold' && 
-          userT.responseStatus === 'threshold'
-      );
-      
-      if (matchingActual) {
-        const difference = Math.abs(userT.hearingLevel - matchingActual.hearingLevel);
-        if (difference <= 5) {
-          // Within 5dB is considered accurate
-          accuracySum += 100 - (difference * 5); // 100% for exact match, 75% for 5dB difference
-        } else if (difference <= 10) {
-          // Within 10dB is partially accurate
-          accuracySum += 50; // 50% accuracy for 6-10dB difference
-        } else {
-          // More than 10dB difference is considered inaccurate
-          accuracySum += 25; // 25% accuracy for >10dB difference
+      // Only compare thresholds that were actually tested
+      if (userT.responseStatus === 'threshold') {
+        const matchingActual = actualThresholds.find(
+          actT => 
+            actT.frequency === userT.frequency && 
+            actT.ear === userT.ear && 
+            actT.testType === userT.testType && 
+            actT.responseStatus === 'threshold'
+        );
+        
+        if (matchingActual) {
+          const difference = Math.abs(userT.hearingLevel - matchingActual.hearingLevel);
+          if (difference <= 5) {
+            // Within 5dB is considered accurate
+            accuracySum += 100 - (difference * 5); // 100% for exact match, 75% for 5dB difference
+          } else if (difference <= 10) {
+            // Within 10dB is partially accurate
+            accuracySum += 50; // 50% accuracy for 6-10dB difference
+          } else {
+            // More than 10dB difference is considered inaccurate
+            accuracySum += 25; // 25% accuracy for >10dB difference
+          }
+          comparedCount++;
         }
-        comparedCount++;
       }
     });
     
-    // Calculate overall accuracy
+    // Calculate overall accuracy based on tested frequencies only
     const accuracy = comparedCount > 0 ? Math.round(accuracySum / comparedCount) : 0;
+    
+    // Calculate total unique frequencies expected
+    const uniqueFreqsPerEar = {
+      air: this.includeAirConduction ? 10 : 0,  // 10 frequencies for air conduction (1kHz counted once)
+      bone: this.includeBoneConduction ? 4 : 0  // 4 frequencies for bone conduction (1kHz counted once)
+    };
+    
+    const totalUniqueFreqs = (uniqueFreqsPerEar.air * 2) + (uniqueFreqsPerEar.bone * 2); // Multiply by 2 for both ears
+    
+    // Count tested frequencies (excluding duplicate 1kHz tests)
+    const testedFrequencies = new Set(
+      userThresholds
+        .filter(t => t.responseStatus !== 'not_tested')
+        .map(t => `${t.frequency}-${t.ear}-${t.testType}`)
+    ).size;
     
     // Create the result object
     const result: TestResult = {
       patientId: session.patientId,
       timestamp: new Date().toISOString(),
       userThresholds: userThresholds,
-      actualThresholds: actualThresholds, // Include the actual thresholds
+      actualThresholds: actualThresholds,
       accuracy: accuracy,
       testDuration: this.calculateTestDuration(session),
       technicalErrors: this.identifyTechnicalErrors(session),
-      falsePositives: this.falsePositiveCount
+      falsePositives: this.falsePositiveCount,
+      completionStatus: {
+        totalFrequencies: totalUniqueFreqs,
+        testedFrequencies: testedFrequencies,
+        untestedFrequencies: totalUniqueFreqs - testedFrequencies,
+        completionPercentage: Math.round((testedFrequencies / totalUniqueFreqs) * 100)
+      }
     };
     
     // Reset the false positive count for the next session
@@ -538,102 +573,151 @@ class TestingService {
    * @returns Array of threshold points
    */
   private extractThresholds(session: TestSession): ThresholdPoint[] {
+    // First, group steps by unique frequency-ear-type combinations
+    const stepGroups = new Map<string, TestStep[]>();
+    session.testSequence.forEach(step => {
+      const key = `${step.frequency}-${step.ear}-${step.testType}`;
+      if (!stepGroups.has(key)) {
+        stepGroups.set(key, []);
+      }
+      stepGroups.get(key)!.push(step);
+    });
+
     const thresholds: ThresholdPoint[] = [];
     
-    session.testSequence.forEach(step => {
-      if (step.completed && step.responses.length > 0) {
-        // For completed steps, find the validated threshold level from the responses
-        // This is the lowest level with at least 2/3 positive responses
-        const levelCounts = new Map<HearingLevel, { total: number, heard: number }>();
-        
-        step.responses.forEach(response => {
-          const level = response.level;
-          const existing = levelCounts.get(level) || { total: 0, heard: 0 };
-          existing.total += 1;
-          if (response.response) {
-            existing.heard += 1;
-          }
-          levelCounts.set(level, existing);
-        });
-        
-        // Find the lowest valid threshold level
-        let validatedThreshold: HearingLevel | null = null;
-        let lowestValidLevel = Infinity;
-        
-        levelCounts.forEach((counts, level) => {
-          if (counts.total >= 3 && counts.heard >= 2 && level < lowestValidLevel) {
-            lowestValidLevel = level;
-            validatedThreshold = level;
-          }
-        });
-        
-        // If we found a validated threshold, use it; otherwise fall back to currentLevel
-        const thresholdLevel = validatedThreshold !== null ? validatedThreshold : step.currentLevel;
-        console.log(`Extracting threshold for completed step: ${thresholdLevel}dB (was ${step.currentLevel}dB)`);
-        
-        thresholds.push({
-          frequency: step.frequency,
-          hearingLevel: thresholdLevel,
-          ear: step.ear,
-          testType: step.testType,
-          responseStatus: 'threshold'
-        });
-      } else if (step.responses.length > 0) {
-        // For incomplete steps with responses, find the lowest level with at least 2 responses
-        console.log(`Extracting threshold data for incomplete step with ${step.responses.length} responses`);
-        
-        const levelCounts = new Map<HearingLevel, number>();
-        
-        step.responses.forEach(response => {
-          if (response.response) {
-            const count = levelCounts.get(response.level) || 0;
-            levelCounts.set(response.level, count + 1);
-          }
-        });
-        
-        // Find the lowest level with at least 2 responses
-        let thresholdLevel: HearingLevel | null = null;
-        let lowestLevel = Infinity;
-        
-        levelCounts.forEach((count, level) => {
-          if (count >= 2 && level < lowestLevel) {
-            lowestLevel = level;
-            thresholdLevel = level;
-          }
-        });
-        
-        if (thresholdLevel !== null) {
-          console.log(`Found valid threshold in incomplete step at: ${thresholdLevel}dB`);
+    // Process each unique frequency-ear-type combination
+    stepGroups.forEach((steps, key) => {
+      // For 1kHz, find the best result among multiple tests
+      if (steps[0].frequency === 1000) {
+        // Find the step with the most complete data
+        const completedStep = steps.find(s => s.completed && s.responseStatus === 'threshold');
+        if (completedStep) {
+          // Use the completed step's data
+          thresholds.push({
+            frequency: completedStep.frequency,
+            hearingLevel: completedStep.currentLevel,
+            ear: completedStep.ear,
+            testType: completedStep.testType,
+            responseStatus: 'threshold'
+          });
+        } else {
+          // Find step with most responses if none are completed
+          const stepWithMostResponses = steps.reduce((prev, curr) => 
+            (curr.responses.length > prev.responses.length) ? curr : prev
+          );
           
+          if (stepWithMostResponses.responses.length > 0) {
+            // Process responses to find threshold or no_response status
+            const levelCounts = new Map<HearingLevel, number>();
+            stepWithMostResponses.responses.forEach(response => {
+              if (response.response) {
+                const count = levelCounts.get(response.level) || 0;
+                levelCounts.set(response.level, count + 1);
+              }
+            });
+            
+            // Find lowest level with at least 2 responses
+            let thresholdLevel: HearingLevel | null = null;
+            let lowestLevel = Infinity;
+            
+            levelCounts.forEach((count, level) => {
+              if (count >= 2 && level < lowestLevel) {
+                lowestLevel = level;
+                thresholdLevel = level;
+              }
+            });
+            
+            if (thresholdLevel !== null) {
+              thresholds.push({
+                frequency: stepWithMostResponses.frequency,
+                hearingLevel: thresholdLevel,
+                ear: stepWithMostResponses.ear,
+                testType: stepWithMostResponses.testType,
+                responseStatus: 'threshold'
+              });
+            } else {
+              // No valid threshold found, use highest tested level as 'no_response'
+              const highestLevel = Math.max(...stepWithMostResponses.responses.map(r => r.level)) as HearingLevel;
+              thresholds.push({
+                frequency: stepWithMostResponses.frequency,
+                hearingLevel: highestLevel,
+                ear: stepWithMostResponses.ear,
+                testType: stepWithMostResponses.testType,
+                responseStatus: 'no_response'
+              });
+            }
+          } else {
+            // No responses recorded for either test
+            thresholds.push({
+              frequency: steps[0].frequency,
+              hearingLevel: 0 as HearingLevel,
+              ear: steps[0].ear,
+              testType: steps[0].testType,
+              responseStatus: 'not_tested'
+            });
+          }
+        }
+      } else {
+        // For non-1kHz frequencies, process normally
+        const step = steps[0];
+        if (step.completed && step.responseStatus === 'threshold') {
           thresholds.push({
             frequency: step.frequency,
-            hearingLevel: thresholdLevel,
+            hearingLevel: step.currentLevel,
             ear: step.ear,
             testType: step.testType,
             responseStatus: 'threshold'
           });
         } else if (step.responses.length > 0) {
-          // No threshold established, use highest level tested
-          const highestLevel = Math.max(...step.responses.map(r => r.level)) as HearingLevel;
-          console.log(`No valid threshold found, using highest level: ${highestLevel}dB`);
+          // Process responses to find threshold or no_response status
+          const levelCounts = new Map<HearingLevel, number>();
+          step.responses.forEach(response => {
+            if (response.response) {
+              const count = levelCounts.get(response.level) || 0;
+              levelCounts.set(response.level, count + 1);
+            }
+          });
           
+          // Find lowest level with at least 2 responses
+          let thresholdLevel: HearingLevel | null = null;
+          let lowestLevel = Infinity;
+          
+          levelCounts.forEach((count, level) => {
+            if (count >= 2 && level < lowestLevel) {
+              lowestLevel = level;
+              thresholdLevel = level;
+            }
+          });
+          
+          if (thresholdLevel !== null) {
+            thresholds.push({
+              frequency: step.frequency,
+              hearingLevel: thresholdLevel,
+              ear: step.ear,
+              testType: step.testType,
+              responseStatus: 'threshold'
+            });
+          } else {
+            // No valid threshold found, use highest tested level as 'no_response'
+            const highestLevel = Math.max(...step.responses.map(r => r.level)) as HearingLevel;
+            thresholds.push({
+              frequency: step.frequency,
+              hearingLevel: highestLevel,
+              ear: step.ear,
+              testType: step.testType,
+              responseStatus: 'no_response'
+            });
+          }
+        } else {
+          // Step was not tested at all
           thresholds.push({
             frequency: step.frequency,
-            hearingLevel: highestLevel,
+            hearingLevel: 0 as HearingLevel,
             ear: step.ear,
             testType: step.testType,
-            responseStatus: 'no_response'
+            responseStatus: 'not_tested'
           });
         }
-      } else {
-        // Step was skipped or incomplete
-        thresholds.push({
-          frequency: step.frequency,
-          hearingLevel: 0 as HearingLevel,
-          ear: step.ear,
-          testType: step.testType,
-          responseStatus: 'not_tested'
-        });
       }
     });
     
@@ -739,40 +823,79 @@ class TestingService {
     const totalSteps = this.currentSession.testSequence.length;
     if (totalSteps === 0) return 0;
     
-    // Count completed steps with stored thresholds instead of using the current step index
-    const completedSteps = this.currentSession.testSequence.filter(
-      step => step.completed && step.responseStatus === 'threshold'
-    ).length;
-    
-    // Enhanced debugging to troubleshoot progress calculation
-    console.log(`Progress calculation:`, {
-      totalSteps,
-      completedSteps,
-      // Log the actual steps that are counted as completed with thresholds
-      completedThresholdSteps: this.currentSession.testSequence
-        .filter(step => step.completed && step.responseStatus === 'threshold')
-        .map(s => ({
-          id: s.id,
-          frequency: s.frequency,
-          ear: s.ear,
-          level: s.currentLevel,
-          responseStatus: s.responseStatus
-        })),
-      // Log all steps that are marked as completed regardless of responseStatus
-      allCompletedSteps: this.currentSession.testSequence
-        .filter(step => step.completed)
-        .map(s => ({
-          id: s.id,
-          frequency: s.frequency,
-          ear: s.ear,
-          level: s.currentLevel,
-          responseStatus: s.responseStatus || 'none' // Show 'none' if undefined
-        }))
+    // Group steps by frequency, ear, and test type
+    const stepGroups = new Map<string, TestStep[]>();
+    this.currentSession.testSequence.forEach(step => {
+      const key = `${step.frequency}-${step.ear}-${step.testType}`;
+      if (!stepGroups.has(key)) {
+        stepGroups.set(key, []);
+      }
+      stepGroups.get(key)!.push(step);
     });
+
+    // Count completed unique frequency-ear-type combinations
+    let completedUniqueSteps = 0;
+    let totalUniqueSteps = 0;
+
+    // Calculate expected total steps:
+    // Air conduction: 10 frequencies per ear (counting 1kHz once)
+    // Bone conduction: 4 frequencies per ear (counting 1kHz once)
+    const airConductionFreqs = this.includeAirConduction ? 20 : 0; // 10 per ear
+    const boneConductionFreqs = this.includeBoneConduction ? 8 : 0; // 4 per ear
+    totalUniqueSteps = airConductionFreqs + boneConductionFreqs;
+
+    // Count completed steps
+    const completedByEarType = new Map<string, Set<number>>();
     
-    // Calculate progress as percentage of completed thresholds
-    const progress = Math.round((completedSteps / totalSteps) * 100);
-    console.log(`Progress: ${completedSteps}/${totalSteps} steps completed (${progress}%)`);
+    // Initialize sets for each ear and test type
+    ['right-air', 'left-air', 'right-bone', 'left-bone'].forEach(key => {
+      completedByEarType.set(key, new Set());
+    });
+
+    // Process each step
+    this.currentSession.testSequence.forEach(step => {
+      if (step.completed && step.responseStatus === 'threshold') {
+        const key = `${step.ear}-${step.testType}`;
+        completedByEarType.get(key)?.add(step.frequency);
+      }
+    });
+
+    // Count unique completed frequencies for each ear and test type
+    let totalCompleted = 0;
+    completedByEarType.forEach((frequencies, key) => {
+      const [ear, testType] = key.split('-');
+      // For each ear-type combination, count unique frequencies
+      totalCompleted += frequencies.size;
+    });
+
+    completedUniqueSteps = totalCompleted;
+    
+    // Calculate progress based on unique steps
+    const progress = Math.round((completedUniqueSteps / totalUniqueSteps) * 100);
+    
+    // Enhanced debugging
+    console.log(`Progress calculation:`, {
+      totalUniqueSteps,
+      completedUniqueSteps,
+      progress,
+      airConductionFreqs,
+      boneConductionFreqs,
+      completedByEarType: Array.from(completedByEarType.entries()).map(([key, freqs]) => ({
+        key,
+        frequencies: Array.from(freqs)
+      })),
+      stepGroups: Array.from(stepGroups.entries()).map(([key, steps]) => ({
+        key,
+        completed: steps.some(s => s.completed && s.responseStatus === 'threshold'),
+        steps: steps.map(s => ({
+          id: s.id,
+          frequency: s.frequency,
+          ear: s.ear,
+          completed: s.completed,
+          responseStatus: s.responseStatus
+        }))
+      }))
+    });
     
     return progress;
   }

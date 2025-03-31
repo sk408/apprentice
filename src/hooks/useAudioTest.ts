@@ -70,6 +70,7 @@ interface UseAudioTestReturn {
   handleSuggestedAction: () => void;
   handleAudiogramClick: (frequency: number, level: number) => void;
   validateThreshold: () => { isValid: boolean; message: string };
+  updateSession: (session: TestSession | null) => void;
 }
 
 const useAudioTest = (
@@ -347,7 +348,8 @@ const useAudioTest = (
     handlePreviousStep,
     handleSuggestedAction,
     handleAudiogramClick,
-    validateThreshold
+    validateThreshold,
+    updateSession: setSession
   };
 };
 

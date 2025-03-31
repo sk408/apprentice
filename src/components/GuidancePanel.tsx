@@ -171,27 +171,28 @@ const GuidancePanel: React.FC<GuidancePanelProps> = ({
       ]
     },
     descending: {
-      name: 'Descending Phase',
+      name: 'Initial Descent',
       description: 'Decrease intensity in 10 dB steps until the patient no longer responds.',
       tips: [
         'After each response, immediately decrease by 10 dB steps',
         'Continue the descent until the patient fails to respond',
         'The descending phase identifies the sub-threshold boundary',
-        'This large step size (10 dB) efficiently approaches the threshold region'
+        'This large step size (10 dB) efficiently approaches the threshold region',
+        'Responses during this phase do not count towards threshold determination'
       ]
     },
     ascending: {
-      name: 'Ascending Phase',
+      name: 'Initial Ascent',
       description: 'From the last non-responsive level, increase intensity in 5 dB steps until the patient responds again.',
       tips: [
         'After no response, increase by 5 dB steps',
         'Smaller step size (5 dB) provides more precise threshold determination',
         'Continue until the patient responds again',
-        'This first response marks the beginning of threshold determination'
+        'This first ascending response only identifies the threshold region and does not count towards threshold determination'
       ]
     },
     threshold: {
-      name: 'Threshold Determination (Bracketing)',
+      name: 'Bracketing Phase',
       description: 'Use the 10 dB down / 5 dB up bracketing technique to determine threshold.',
       tips: [
         'After each response: immediately reduce level by 10 dB',
@@ -393,7 +394,8 @@ const GuidancePanel: React.FC<GuidancePanelProps> = ({
           )}
         </Box>
         
-        {action === 'store_threshold' && canStoreThreshold && onStoreThreshold && (
+        {/* Store Threshold Button */}
+        {action === 'store_threshold' && onStoreThreshold && (
           <Button 
             variant="contained" 
             color="success" 

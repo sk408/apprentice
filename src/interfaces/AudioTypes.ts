@@ -54,6 +54,12 @@ export interface TestResult {
   testDuration: number; // In seconds
   technicalErrors: string[]; // Description of errors in technique
   falsePositives: number; // Count of false positive responses
+  completionStatus: {
+    totalFrequencies: number;
+    testedFrequencies: number;
+    untestedFrequencies: number;
+    completionPercentage: number;
+  };
 }
 
 // Test session for tracking progress

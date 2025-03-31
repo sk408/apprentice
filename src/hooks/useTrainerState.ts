@@ -24,6 +24,54 @@ interface TrainerStateResult {
 }
 
 /**
+ * Validates if a threshold has been established according to Hughson-Westlake criteria
+ * @param heardCount Number of positive responses
+ * @param totalCount Total number of presentations
+ * @returns Object containing validation result and explanation
+ */
+const validateThresholdCriteria = (heardCount: number, totalCount: number): { 
+  isValid: boolean; 
+  reason: string;
+} => {
+  // Must have at least 2 presentations
+  if (totalCount < 2) {
+    return { 
+      isValid: false, 
+      reason: `Need more presentations (currently ${totalCount}, need at least 2)`
+    };
+  }
+
+  // Check for 2/2 responses
+  if (totalCount === 2 && heardCount === 2) {
+    return {
+      isValid: true,
+      reason: 'Valid threshold: 2 out of 2 responses'
+    };
+  }
+
+  // Check for 2/3 responses
+  if (totalCount === 3 && heardCount >= 2) {
+    return {
+      isValid: true,
+      reason: 'Valid threshold: 2 out of 3 responses'
+    };
+  }
+
+  // If we have more than 3 presentations but still meet criteria
+  if (totalCount > 3 && heardCount >= 2) {
+    return {
+      isValid: true,
+      reason: `Valid threshold: ${heardCount} out of ${totalCount} responses`
+    };
+  }
+
+  return {
+    isValid: false,
+    reason: `Invalid threshold: only ${heardCount} out of ${totalCount} responses`
+  };
+};
+
+/**
  * Updates the trainer state based on patient response
  */
 export const updateTrainerState = (
@@ -35,26 +83,94 @@ export const updateTrainerState = (
   lastPresentationTime: number,
   lastProcessedPresentation: number
 ): TrainerStateResult => {
+  // Add detailed logging of input parameters
+  console.log('🔄 updateTrainerState called with:', {
+    didRespond,
+    currentStep: currentStep ? {
+      frequency: currentStep.frequency,
+      ear: currentStep.ear,
+      currentLevel: currentStep.currentLevel
+    } : null,
+    procedurePhase,
+    thresholdPhaseStartTime,
+    lastPresentationTime,
+    lastProcessedPresentation
+  });
+
+  // Input validation and edge cases
   if (!currentStep) {
-    console.log('Cannot update trainer state: currentStep is falsy');
+    console.warn('❌ Cannot update trainer state: currentStep is null');
     return {
       procedurePhase,
       suggestedAction: 'present',
-      guidance: 'No current step available',
+      guidance: 'Error: No current test step available. Please restart the test.',
       lastResponseLevel: null,
       responseCounts
     };
   }
-  
-  console.log('🔍 Processing response:', didRespond, 'in phase:', procedurePhase);
-  
+
+  // Validate timing to prevent double-counting
+  if (lastPresentationTime <= lastProcessedPresentation) {
+    console.warn('⚠️ Duplicate presentation detected:', {
+      lastPresentationTime,
+      lastProcessedPresentation,
+      timeDiff: lastPresentationTime - lastProcessedPresentation
+    });
+    return {
+      procedurePhase,
+      suggestedAction: 'present',
+      guidance: 'Please wait before presenting the next tone.',
+      lastResponseLevel: null,
+      responseCounts
+    };
+  }
+
+  // Validate threshold phase timing
+  if (procedurePhase === 'threshold' && (!thresholdPhaseStartTime || lastPresentationTime <= thresholdPhaseStartTime)) {
+    console.warn('⚠️ Invalid threshold phase timing:', {
+      thresholdPhaseStartTime,
+      lastPresentationTime,
+      timeDiff: lastPresentationTime - (thresholdPhaseStartTime || 0)
+    });
+    return {
+      procedurePhase,
+      suggestedAction: 'present',
+      guidance: 'Please wait a moment before continuing the test.',
+      lastResponseLevel: null,
+      responseCounts
+    };
+  }
+
   // Use a local copy of response counts to avoid mutation issues
-  let updatedResponseCounts = { ...responseCounts };
+  let updatedResponseCounts = JSON.parse(JSON.stringify(responseCounts));
   let newPhase = procedurePhase;
   let newAction: SuggestedAction = 'present';
   let newGuidance = '';
   let newLastResponseLevel = null;
+
+  // Extract current test parameters for easier reference
+  const { frequency, ear, currentLevel } = currentStep;
   
+  // Ensure response counts structure exists
+  if (!updatedResponseCounts[frequency]) {
+    updatedResponseCounts[frequency] = {};
+  }
+  if (!updatedResponseCounts[frequency][ear]) {
+    updatedResponseCounts[frequency][ear] = {};
+  }
+  if (!updatedResponseCounts[frequency][ear][currentLevel]) {
+    updatedResponseCounts[frequency][ear][currentLevel] = { total: 0, heard: 0 };
+  }
+
+  // Log current state before processing
+  console.log('📊 Current state before processing:', {
+    frequency,
+    ear,
+    currentLevel,
+    currentResponses: updatedResponseCounts[frequency][ear][currentLevel],
+    phase: procedurePhase
+  });
+
   if (didRespond) {
     console.log('Patient responded - updating state');
     
@@ -62,45 +178,42 @@ export const updateTrainerState = (
       // If patient responds on first presentation, change to descending phase
       newPhase = 'descending';
       newAction = 'decrease';
-      newGuidance = 'The patient responded at this level. According to Hughson-Westlake, the next step would be to decrease by 10 dB and present the tone again.';
+      newGuidance = `Good! The patient heard the initial tone at ${currentLevel} dB. Following Hughson-Westlake protocol, we'll now begin the descending phase. Decrease by 10 dB and present the tone again. We'll continue decreasing by 10 dB until the patient no longer responds.
+      
+      Note: Responses during the initial descent do not count towards threshold determination.`;
       console.log('Initial phase - patient responded, changing to descending phase');
+      
+      // Don't update response counts during initial phase
     } else if (procedurePhase === 'descending') {
-      // Continue descending
+      // Continue descending - responses during descending phase don't count towards threshold
       newPhase = 'descending';
       newAction = 'decrease';
-      newGuidance = 'The patient can still hear at this level. In the descending phase, you should continue to decrease by 10 dB intervals.';
-      console.log('Descending phase - patient responded, suggesting continue decreasing');
+      newGuidance = `The patient can still hear at ${currentLevel} dB. Continue the descending phase by decreasing in 10 dB steps. This helps us quickly find the approximate threshold region. Once the patient stops responding, we'll begin the more precise bracketing pattern.
+      
+      Note: Responses during the descending phase are only used to find the approximate threshold region and do not count towards threshold determination.`;
+      console.log('Descending phase - patient responded, suggesting continue decreasing (response not counted for threshold)');
+      
+      // Don't update response counts during descending phase
     } else if (procedurePhase === 'ascending') {
       // If patient responds during ascending phase, we've found a potential threshold
-      // This is the beginning of the bracketing pattern
+      // but this first response doesn't count towards threshold determination
       newPhase = 'threshold';
+      newLastResponseLevel = currentLevel;
+      newAction = 'decrease';
+      newGuidance = `You've found a potential threshold region at ${currentLevel} dB! Now we'll begin the precise bracketing pattern to determine the exact threshold. The Hughson-Westlake protocol requires:
+      1. Decrease by 10 dB after EVERY response
+      2. Increase by 5 dB when there's NO response
+      3. Establish threshold when patient responds to 2 out of 2 or 2 out of 3 presentations at the same level
       
-      // Track responses at the current level
-      const currentLevel = currentStep.currentLevel;
+      Note: This first ascending response is used only to identify the threshold region and does not count towards threshold determination.
+      Let's start by decreasing 10 dB.`;
+      console.log(`Ascending phase - patient responded at ${currentLevel}dB, changed to threshold phase without counting response`);
       
-      // Update response counts for this level
-      const frequency = currentStep.frequency;
-      const ear = currentStep.ear;
-      
-      // Make sure to use the proper frequency and ear for tracking responses
-      if (!updatedResponseCounts[frequency]) {
-        updatedResponseCounts[frequency] = {};
-      }
-      if (!updatedResponseCounts[frequency][ear]) {
-        updatedResponseCounts[frequency][ear] = {};
-      }
-      if (!updatedResponseCounts[frequency][ear][currentLevel]) {
+      // Don't update response counts for this first ascending response
+      // Reset the response counts for this level since we're starting fresh in threshold phase
+      if (updatedResponseCounts[frequency][ear][currentLevel]) {
         updatedResponseCounts[frequency][ear][currentLevel] = { total: 0, heard: 0 };
       }
-      
-      // Set UI to show the current level we're tracking
-      newLastResponseLevel = currentLevel;
-      
-      // After any positive response, must immediately decrease by 10 dB
-      newAction = 'decrease';
-      newGuidance = `You've found the potential threshold! The patient responded at ${currentLevel} dB. According to Hughson-Westlake protocol, you must immediately decrease by 10 dB and begin the bracketing pattern (10 dB down after response, 5 dB up after no response).`;
-      console.log(`Ascending phase - patient responded at ${currentLevel}dB, changed to threshold phase, starting bracketing pattern`);
-      
     } else if (procedurePhase === 'threshold') {
       // Continue tracking responses at the current level
       const currentLevel = currentStep.currentLevel;
@@ -146,34 +259,33 @@ export const updateTrainerState = (
           newAction = 'decrease';
           
           // Then check if we've already confirmed threshold
-          if (totalCount >= 2) {
-            if (heardCount >= 2) {
-              // Confirmed threshold: at least 2 out of 3 responses
-              console.log(`✅ Threshold CONFIRMED at ${currentLevel}dB with ${heardCount}/${totalCount} responses.`);
-              newPhase = 'complete';
-              newAction = 'store_threshold';
-              newGuidance = `Excellent! You have established a threshold at ${currentLevel} dB. The patient has responded ${heardCount} times out of ${totalCount} at this level, which meets the criteria of "2 out of 3" responses needed to establish a threshold. You can now store this value and move to the next frequency.`;
-            } else {
-              // Failed threshold confirmation: less than 2 out of 3 responses
-              console.log(`❌ Threshold NOT confirmed at ${currentLevel}dB with only ${heardCount}/${totalCount} responses.`);
-              newAction = 'decrease';
-              newGuidance = `The patient responded, but has only ${heardCount} total responses out of ${totalCount} at ${currentLevel} dB. Following Hughson-Westlake protocol, decrease by 10 dB after ANY response, then continue testing.`;
-            }
-          } else if (heardCount >= 2) {
-            // Already have 2 positive responses, but continue for confirmation
-            console.log(`👍 Already have ${heardCount} positive responses at ${currentLevel}dB, need more presentations for confirmation.`);
-            newAction = 'decrease';
-            newGuidance = `Good! The patient has responded ${heardCount} times at ${currentLevel} dB. Following Hughson-Westlake protocol, decrease by 10 dB after EACH response, then continue the bracketing pattern.`;
-          } else if (totalCount === 2 && heardCount === 1) {
-            // Have 1 out of 2 responses, need more presentations
-            console.log(`⏳ Have 1 out of 2 responses at ${currentLevel}dB, continuing bracketing.`);
-            newAction = 'decrease';
-            newGuidance = `The patient has responded once out of ${totalCount} presentations at ${currentLevel} dB. Following Hughson-Westlake protocol, decrease by 10 dB after EACH response, then continue the bracketing pattern.`;
+          const thresholdValidation = validateThresholdCriteria(heardCount, totalCount);
+          
+          if (thresholdValidation.isValid) {
+            // Confirmed threshold according to Hughson-Westlake criteria
+            console.log(`✅ Threshold CONFIRMED at ${currentLevel}dB - ${thresholdValidation.reason}`);
+            newPhase = 'complete';
+            newAction = 'store_threshold';
+            newGuidance = `Excellent! You have established a valid threshold at ${currentLevel} dB. ${thresholdValidation.reason}. 
+            
+            This threshold was determined using proper Hughson-Westlake bracketing:
+            • Started with descending 10 dB steps
+            • Used 5 dB ascending steps
+            • Confirmed with ${heardCount}/${totalCount} responses at this level
+            
+            You can now store this threshold and move to the next test frequency.`;
           } else {
-            // Continue testing with the bracketing pattern
-            console.log(`⏳ Starting bracketing at ${currentLevel}dB (have ${heardCount}/${totalCount}, need at least 2/3)`);
+            // Haven't met threshold criteria yet
+            console.log(`⏳ Continuing threshold testing at ${currentLevel}dB - ${thresholdValidation.reason}`);
             newAction = 'decrease';
-            newGuidance = `The patient has responded ${heardCount} time(s) out of ${totalCount} at ${currentLevel} dB. Following Hughson-Westlake protocol, decrease by 10 dB after EACH response, then continue the bracketing pattern.`;
+            newGuidance = `The patient responded at ${currentLevel} dB, but we haven't established a threshold yet. ${thresholdValidation.reason}. 
+            
+            Remember the Hughson-Westlake rules:
+            • ALWAYS decrease by 10 dB after a response
+            • Need 2 out of 2 or 2 out of 3 responses at the same level
+            • Responses must be during the bracketing phase
+            
+            Following protocol, decrease by 10 dB and continue the bracketing pattern.`;
           }
         } else {
           console.log(`⚠️ Double counting prevented! This presentation (${lastPresentationTime}) was already processed.`);
@@ -187,76 +299,63 @@ export const updateTrainerState = (
     // No response
     console.log('Patient did NOT respond - updating state');
     
-    if (procedurePhase === 'initial') {
-      // Initial level too low, suggest increasing
-      newAction = 'increase';
-      newGuidance = 'The patient did not respond to the initial presentation. This suggests the starting level was too low. Increase the level by 10-15 dB and try again.';
-      console.log('Initial phase - no response, suggest increasing');
-    } else if (procedurePhase === 'descending') {
-      // Move to ascending phase when patient stops responding during descending
-      newPhase = 'ascending';
-      newAction = 'increase';
-      newGuidance = 'The patient no longer responds at this level. This means we\'ve gone below their threshold. Now switch to the ascending phase: increase by 5 dB steps until the patient responds again. Note that we use smaller steps (5 dB) when ascending to more precisely determine the threshold.';
-      console.log('Descending phase - no response, changing to ascending phase');
-    } else if (procedurePhase === 'threshold') {
-      // During threshold determination - if no response, track it and suggest increasing by 5dB
-      const currentLevel = currentStep.currentLevel;
-      
-      // Update response counts for this level
-      const frequency = currentStep.frequency;
-      const ear = currentStep.ear;
-      
-      if (!updatedResponseCounts[frequency]) {
-        updatedResponseCounts[frequency] = {};
-      }
-      if (!updatedResponseCounts[frequency][ear]) {
-        updatedResponseCounts[frequency][ear] = {};
-      }
-      if (!updatedResponseCounts[frequency][ear][currentLevel]) {
-        updatedResponseCounts[frequency][ear][currentLevel] = { total: 0, heard: 0 };
-      }
+    const currentLevel = currentStep.currentLevel;
+    const frequency = currentStep.frequency;
+    const ear = currentStep.ear;
+    
+    if (!updatedResponseCounts[frequency]) {
+      updatedResponseCounts[frequency] = {};
+    }
+    if (!updatedResponseCounts[frequency][ear]) {
+      updatedResponseCounts[frequency][ear] = {};
+    }
+    if (!updatedResponseCounts[frequency][ear][currentLevel]) {
+      updatedResponseCounts[frequency][ear][currentLevel] = { total: 0, heard: 0 };
+    }
+    
+    // Only count no-responses during the threshold phase
+    if (procedurePhase === 'threshold') {
       updatedResponseCounts[frequency][ear][currentLevel].total += 1;
-      // No response, so don't increment the heard count
+      // No response, so don't increment heard count
+      console.log(`Threshold phase - adding no-response at ${currentLevel}dB for ${frequency}Hz, ${ear} ear: ${updatedResponseCounts[frequency][ear][currentLevel].heard}/${updatedResponseCounts[frequency][ear][currentLevel].total} responses`);
+    } else {
+      console.log(`${procedurePhase} phase - not counting no-response towards threshold determination`);
+    }
 
-      // Get the counts for this level
-      const heardCount = updatedResponseCounts[currentStep.frequency][currentStep.ear][currentLevel].heard;
-      const totalCount = updatedResponseCounts[currentStep.frequency][currentStep.ear][currentLevel].total;
-      
-      console.log(`🔢 Current responses at ${currentLevel}dB: ${heardCount}/${totalCount}`);
-      
-      // FIXED HUGHSON-WESTLAKE PROTOCOL FOR NO RESPONSE:
-      // After no response, check if we already have a threshold (2/3 responses)
-      // First check if we've already met threshold criteria despite this no-response
-      if (totalCount >= 2 && heardCount >= 2) {
-        // We already have a threshold! (2+ out of 3+ responses)
-        console.log(`✅ Threshold CONFIRMED at ${currentLevel}dB with ${heardCount}/${totalCount} responses, despite this no-response.`);
-        newPhase = 'complete';
-        newAction = 'store_threshold';
-        newGuidance = `You have established a threshold at ${currentLevel} dB. The patient has responded ${heardCount} times out of ${totalCount} at this level, which meets the criteria of "2 out of 3" responses needed to establish a threshold. You can now store this value and move to the next frequency.`;
-      } else if (totalCount >= 2 && heardCount < 2) {
-        // Failed to confirm threshold at this level - move up 5 dB
-        console.log(`❌ Level ${currentLevel}dB is below threshold with only ${heardCount}/${totalCount} positive responses.`);
+    switch (procedurePhase) {
+      case 'initial':
+        // In initial phase, increase by 10dB until we get a response
         newAction = 'increase';
-        newGuidance = `The patient did not respond at ${currentLevel} dB (${heardCount}/${totalCount} responses). Following Hughson-Westlake protocol, increase by 5 dB and continue the bracketing pattern.`;
-      } else if (totalCount - heardCount >= 2) {
-        // Already have 2 negative responses, suggest increasing by 5 dB
-        console.log(`👎 Already have ${totalCount - heardCount} negative responses at ${currentLevel}dB, suggesting to increase.`);
+        newGuidance = `No response at ${currentLevel} dB. Since this is the initial presentation and we need to find a clearly audible starting level, increase by 10 dB. We'll continue increasing until we get a response, then begin the descending phase.`;
+        break;
+        
+      case 'descending':
+        // No response during descending phase means we've gone too low
+        // Switch to ascending phase and start bracketing
+        newPhase = 'ascending';
         newAction = 'increase';
-        newGuidance = `The patient has failed to respond ${totalCount - heardCount} times out of ${totalCount} at ${currentLevel} dB. Following Hughson-Westlake protocol, increase by 5 dB and continue the bracketing pattern.`;
-      } else {
-        // Continue testing with bracketing pattern
+        newGuidance = `No response at ${currentLevel} dB - this means we've descended below the threshold region. Now we'll begin the ascending phase:
+        1. First, increase by 5 dB (smaller steps for more accuracy)
+        2. Continue ascending until patient responds
+        3. That first ascending response will mark the start of threshold determination`;
+        break;
+        
+      case 'threshold':
+        // In threshold phase, always increase by 5dB after no response
         newAction = 'increase';
-        newGuidance = `Patient did not respond at ${currentLevel} dB (${heardCount}/${totalCount} responses so far). Following Hughson-Westlake protocol, increase by 5 dB and continue the bracketing pattern.`;
-      }
-    } else if (procedurePhase === 'ascending') {
-      // Continue ascending
-      newPhase = 'ascending';
-      newAction = 'increase';
-      newGuidance = 'Patient still doesn\'t respond at this level. Continue to increase by 5 dB steps until you get a response. Remember, we use smaller 5 dB steps during the ascending phase for more precise threshold determination.';
-      console.log('Ascending phase - no response, continue ascending');
+        newGuidance = `No response at ${currentLevel} dB. Following Hughson-Westlake protocol, increase by 5 dB. Remember:
+        • Use 5 dB steps when going up
+        • Use 10 dB steps when going down
+        • This bracketing pattern helps us precisely determine the threshold`;
+        break;
+        
+      default:
+        // For any other phase (like 'complete'), just maintain current state
+        newAction = 'present';
+        newGuidance = `No response at ${currentLevel} dB.`;
     }
   }
-  
+
   return {
     procedurePhase: newPhase,
     suggestedAction: newAction,
@@ -264,4 +363,4 @@ export const updateTrainerState = (
     lastResponseLevel: newLastResponseLevel,
     responseCounts: updatedResponseCounts
   };
-}; 
+}

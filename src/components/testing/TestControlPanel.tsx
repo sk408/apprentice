@@ -111,8 +111,8 @@ const TestControlPanel: React.FC<TestControlPanelProps> = ({
               }}>
                 <Tooltip 
                   title={
-                    !canStoreThreshold 
-                      ? "More responses needed to determine threshold"
+                    toneActive
+                      ? "Stop the tone before storing threshold"
                       : "Store the current level as the threshold for this frequency"
                   }
                 >
@@ -122,7 +122,7 @@ const TestControlPanel: React.FC<TestControlPanelProps> = ({
                       color="success"
                       startIcon={<CheckCircle />}
                       onClick={onStoreThreshold}
-                      disabled={!canStoreThreshold || toneActive}
+                      disabled={toneActive}
                       sx={{ 
                         py: 1.5,
                         width: '100%',

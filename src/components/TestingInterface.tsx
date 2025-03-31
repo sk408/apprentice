@@ -102,7 +102,8 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
     handlePreviousStep,
     handleSuggestedAction,
     handleAudiogramClick,
-    validateThreshold
+    validateThreshold,
+    updateSession
   } = useAudioTest(patient, onComplete, onCancel);
 
   // Local state for guidance panel visibility
@@ -143,37 +144,64 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
 
   // Handler for manual completion
   const handleManualComplete = () => {
-    if (session) {
-      // Ensure all thresholds are properly stored
-      if (testProgress < 100 && canStoreThreshold) {
-        // If we have a valid threshold that hasn't been stored yet, store it first
-        handleStoreThreshold();
+    if (!session) {
+      setLocalError("Cannot complete the test: No active session found.");
+      return;
+    }
+
+    // Get current progress from TestingService to ensure we have latest state
+    const currentProgress = testingService.calculateProgress();
+    console.log('Current test progress before completion:', currentProgress);
+
+    // If we have a valid threshold that hasn't been stored yet, store it first
+    if (canStoreThreshold) {
+      handleStoreThreshold();
+    }
+    
+    // Warn user if test is incomplete but allow them to proceed
+    if (currentProgress < 100) {
+      const confirmIncomplete = window.confirm(
+        "Some frequencies have not been tested. Would you like to complete the test with the current results? Missing frequencies will be marked as 'not tested'."
+      );
+      if (!confirmIncomplete) {
+        return;
       }
-      
-      // Complete the session in TestingService to calculate results
-      const completedSession = testingService.completeSession();
-      
-      // If the session was successfully completed, use that session object
-      if (completedSession) {
-        console.log('Session completed manually with results:', completedSession.results);
-        // Update the session in useAudioTest hook by calling onComplete
-        // This ensures the session has the completed flag and results with falsePositives
-        if (completedSession.results) {
-          // Create a temporary session object with the completed flag and results for the dialog
-          const tempSession = {
-            ...session,
-            completed: true,
-            results: completedSession.results
-          };
-          // Update the local session variable for the dialog
-          Object.assign(session, tempSession);
+    }
+    
+    // Complete the session in TestingService to calculate results
+    const completedSession = testingService.completeSession();
+    
+    // Always proceed with completion, even if some frequencies are untested
+    if (completedSession) {
+      console.log('Session completed manually with results:', completedSession.results);
+      // Create a temporary session object with the completed flag and results
+      const tempSession = {
+        ...completedSession,
+        completed: true,
+        results: completedSession.results || {
+          patientId: completedSession.patientId,
+          timestamp: new Date().toISOString(),
+          userThresholds: [],
+          actualThresholds: [],
+          accuracy: 0,
+          testDuration: 0,
+          technicalErrors: ['Incomplete test'],
+          falsePositives: 0,
+          completionStatus: {
+            totalFrequencies: 0,
+            testedFrequencies: 0,
+            untestedFrequencies: 0,
+            completionPercentage: 0
+          }
         }
-      }
+      };
+      // Update the session state with the completed session
+      updateSession(tempSession);
       
       // Display the results dialog
       setShowResultsDialog(true);
     } else {
-      setLocalError("Cannot complete the test: No active session found.");
+      setLocalError("Failed to complete the test. Please try again.");
     }
   };
 
@@ -446,20 +474,36 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
                 This feedback helps you improve your audiometric testing skills.
               </Typography>
               
-              {/* Add false positives information - only show if test is complete */}
+              {/* Add completion status information */}
               {session?.completed && session?.results && (
-                <Alert 
-                  severity={session.results.falsePositives > 5 ? "warning" : "info"} 
-                  sx={{ mb: 2 }}
-                >
-                  <Typography variant="subtitle2">
-                    False Positives: {session.results.falsePositives || 0}
-                  </Typography>
-                  <Typography variant="body2">
-                    False positives occur when a patient indicates hearing a tone when none was presented. 
-                    A high number of false positives ({'>'}5) may indicate an unreliable test subject or a need for clearer instructions.
-                  </Typography>
-                </Alert>
+                <>
+                  <Alert 
+                    severity={session.results.completionStatus.completionPercentage < 100 ? "warning" : "info"} 
+                    sx={{ mb: 2 }}
+                  >
+                    <Typography variant="subtitle2">
+                      Test Completion Status: {session.results.completionStatus.completionPercentage}%
+                    </Typography>
+                    <Typography variant="body2">
+                      {session.results.completionStatus.testedFrequencies} out of {session.results.completionStatus.totalFrequencies} frequencies tested.
+                      {session.results.completionStatus.untestedFrequencies > 0 && 
+                        ` ${session.results.completionStatus.untestedFrequencies} frequencies were not tested.`}
+                    </Typography>
+                  </Alert>
+
+                  <Alert 
+                    severity={session.results.falsePositives > 5 ? "warning" : "info"} 
+                    sx={{ mb: 2 }}
+                  >
+                    <Typography variant="subtitle2">
+                      False Positives: {session.results.falsePositives || 0}
+                    </Typography>
+                    <Typography variant="body2">
+                      False positives occur when a patient indicates hearing a tone when none was presented. 
+                      A high number of false positives ({'>'}5) may indicate an unreliable test subject or a need for clearer instructions.
+                    </Typography>
+                  </Alert>
+                </>
               )}
               
               <Grid container spacing={2}>
@@ -472,6 +516,7 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
                       <TableRow>
                         <TableCell>Frequency (Hz)</TableCell>
                         <TableCell>Your Result (dB)</TableCell>
+                        <TableCell>Status</TableCell>
                         <TableCell>Actual (dB)</TableCell>
                         <TableCell>Difference</TableCell>
                       </TableRow>
@@ -484,26 +529,31 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
                           const actualThreshold = patient.thresholds.find(
                             t => t.ear === 'left' && t.frequency === threshold.frequency
                           );
-                          const diff = actualThreshold 
+                          const diff = actualThreshold && threshold.responseStatus === 'threshold'
                             ? threshold.hearingLevel - actualThreshold.hearingLevel 
-                            : 0;
+                            : null;
                           return (
                             <TableRow key={`left-${threshold.frequency}`}>
                               <TableCell>{threshold.frequency}</TableCell>
                               <TableCell>{threshold.hearingLevel}</TableCell>
                               <TableCell>
+                                {threshold.responseStatus === 'threshold' ? 'Tested' :
+                                 threshold.responseStatus === 'no_response' ? 'No Response' : 'Not Tested'}
+                              </TableCell>
+                              <TableCell>
                                 {actualThreshold ? actualThreshold.hearingLevel : 'N/A'}
                               </TableCell>
                               <TableCell 
                                 sx={{ 
-                                  color: Math.abs(diff) <= 5 
+                                  color: !diff ? 'text.secondary' :
+                                    Math.abs(diff) <= 5 
                                     ? 'success.main' 
                                     : Math.abs(diff) <= 10 
                                     ? 'warning.main' 
                                     : 'error.main'
                                 }}
                               >
-                                {diff > 0 ? `+${diff}` : diff}
+                                {diff !== null ? (diff > 0 ? `+${diff}` : diff) : 'N/A'}
                               </TableCell>
                             </TableRow>
                           );
@@ -520,6 +570,7 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
                       <TableRow>
                         <TableCell>Frequency (Hz)</TableCell>
                         <TableCell>Your Result (dB)</TableCell>
+                        <TableCell>Status</TableCell>
                         <TableCell>Actual (dB)</TableCell>
                         <TableCell>Difference</TableCell>
                       </TableRow>
@@ -532,26 +583,31 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
                           const actualThreshold = patient.thresholds.find(
                             t => t.ear === 'right' && t.frequency === threshold.frequency
                           );
-                          const diff = actualThreshold 
+                          const diff = actualThreshold && threshold.responseStatus === 'threshold'
                             ? threshold.hearingLevel - actualThreshold.hearingLevel 
-                            : 0;
+                            : null;
                           return (
                             <TableRow key={`right-${threshold.frequency}`}>
                               <TableCell>{threshold.frequency}</TableCell>
                               <TableCell>{threshold.hearingLevel}</TableCell>
                               <TableCell>
+                                {threshold.responseStatus === 'threshold' ? 'Tested' :
+                                 threshold.responseStatus === 'no_response' ? 'No Response' : 'Not Tested'}
+                              </TableCell>
+                              <TableCell>
                                 {actualThreshold ? actualThreshold.hearingLevel : 'N/A'}
                               </TableCell>
                               <TableCell 
                                 sx={{ 
-                                  color: Math.abs(diff) <= 5 
+                                  color: !diff ? 'text.secondary' :
+                                    Math.abs(diff) <= 5 
                                     ? 'success.main' 
                                     : Math.abs(diff) <= 10 
                                     ? 'warning.main' 
                                     : 'error.main'
                                 }}
                               >
-                                {diff > 0 ? `+${diff}` : diff}
+                                {diff !== null ? (diff > 0 ? `+${diff}` : diff) : 'N/A'}
                               </TableCell>
                             </TableRow>
                           );
@@ -571,20 +627,11 @@ const RefactoredTestingInterface: React.FC<TestingInterfaceProps> = ({
             onClick={() => {
               setShowResultsDialog(false);
               
-              // Make sure the session is properly completed with results
+              // Only complete the session if it hasn't been completed yet
               if (session && !session.completed) {
-                // Explicitly call completeSession to ensure results are calculated
-                const completedSession = testingService.completeSession();
-                if (completedSession) {
-                  console.log('Session completed with results:', completedSession.results);
-                  onComplete(completedSession);
-                } else {
-                  // Fall back to the current session if completeSession fails
-                  console.warn('Failed to complete session, using current session instead');
-                  onComplete(session);
-                }
-              } else {
-                // Session already completed
+                onComplete(session);
+              } else if (session) {
+                // Session is already completed, just pass it through
                 onComplete(session);
               }
             }}
